@@ -68,18 +68,30 @@
     "wif": "2.0.1"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.0",
+    "@eslint/js": "^9.22.0",
+    "@ianvs/prettier-plugin-sort-imports": "^4.4.1",
     "@types/bn.js": "5.1.1",
     "@types/fs-extra": "9.0.12",
     "@types/mocha": "9.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
     "axios": "0.21.2",
     "bip39": "2.3.0",
     "bip65": "1.0.1",
     "bs58": "4.0.0",
     "dhttp": "2.4.2",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsdoc": "^50.6.9",
+    "eslint-plugin-mocha": "^10.5.0",
+    "eslint-plugin-prettier": "^5.2.3",
     "fs-extra": "9.1.0",
+    "globals": "^16.0.0",
     "minimaldata": "1.0.2",
     "mocha": "8.4.0",
     "nyc": "15.1.0",
+    "prettier": "^3.5.3",
     "proxyquire": "1.4.0",
     "sinon": "1.12.2",
     "standard": "9.0.2",
@@ -93,5 +105,14 @@
   "license": "MIT",
   "optionalDependencies": {
     "secp256k1": "3.5.2"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "secp256k1",
+      "tiny-secp256k1"
+    ],
+    "ignoredBuiltDependencies": [
+      "es5-ext"
+    ]
   }
 }

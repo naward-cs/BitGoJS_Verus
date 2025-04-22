@@ -1,2 +1,21 @@
-coverage/
-node_modules
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+#temp while developing changes comment out when done
+/dist
+
+# testing
+/coverage
+
+
+#package lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
