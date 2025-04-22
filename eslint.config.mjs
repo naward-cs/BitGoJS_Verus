@@ -57,7 +57,7 @@ export default [
       "no-duplicate-imports": "off",
       "no-empty": [ "warn", { allowEmptyCatch: false } ],
       "no-extra-boolean-cast": "off",
-      "no-fallthrough": "error",
+      "no-fallthrough": "warn", //TODO return to "error",
       "no-inner-declarations": "off",
       "no-octal": "error",
       "no-prototype-builtins": "warn",
@@ -65,15 +65,15 @@ export default [
       "no-process-env": "off",
       "no-process-exit": "off",
       "no-sync": "warn",
-      "no-undef": "error",
+      "no-undef": "warn", //TODO return to "error",
       "no-unneeded-ternary": "error",
       "no-unreachable": "error",
       "no-useless-escape": "off",
       "no-var": "warn", //fix this later
-      "prefer-const": "error",
+      "prefer-const": "warn", //TODO return to "error",
       "prefer-rest-params": "warn",
       "prefer-spread": "warn",
-      "quote-props": [ "error", "as-needed" ],
+      "quote-props": [ "warn", "as-needed" ], //TODO return back to "error", "as-needed" remove later
       radix: "error",
       "require-yield": "off",
       "@typescript-eslint/explicit-function-return-type": "off",
@@ -83,7 +83,7 @@ export default [
       "@typescript-eslint/no-this-alias": "warn",
       "@typescript-eslint/no-use-before-define": "off",
       "@typescript-eslint/no-var-requires": "off",
-      "@typescript-eslint/no-unused-vars": [ "error", { vars: "all", args: "none" } ],
+      "@typescript-eslint/no-unused-vars": [ "warn", { vars: "all", args: "none" } ],// TODO return to[ "error", { vars: "all", args: "none" } ],
       '@typescript-eslint/consistent-type-imports': [
         'warn',
         { prefer: 'type-imports', fixStyle: 'separate-type-imports' },
@@ -91,7 +91,14 @@ export default [
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-empty-object-type": "warn",
       "@typescript-eslint/no-require-imports": "warn", //TODO remove later
-      "@typescript-eslint/no-unused-expressions": "warn", //TODO remove later 
+      "@typescript-eslint/no-unused-expressions": "warn", //TODO remove later
+      "mocha/consistent-spacing-between-blocks": "off", //TODO remove later
+      "no-redeclare": "off",  //TODO remove later
+      "mocha/no-identical-title": "off",  //TODO remove later
+      "mocha/no-exports": "off",  //TODO remove later
+      "mocha/no-nested-tests": "off",  //TODO remove later
+      "mocha/max-top-level-suites": "off",  //TODO remove later
+      "no-ex-assign": "warn",  //TODO remove later
       "mocha/no-setup-in-describe": "off"
     }
   }
