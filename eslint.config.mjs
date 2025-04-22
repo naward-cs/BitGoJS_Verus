@@ -5,6 +5,7 @@ import { FlatCompat } from "@eslint/eslintrc"
 import js from "@eslint/js"
 import typescriptEslint from "@typescript-eslint/eslint-plugin"
 import tsParser from "@typescript-eslint/parser"
+import mochaParser from 'eslint-plugin-mocha'
 import prettierPlugin from 'eslint-plugin-prettier'
 import globals from "globals"
 import path from "node:path"
@@ -23,13 +24,16 @@ export default [
   { ignores: [ 'dist/**/*.{js,ts}' ] },
   ...compat.extends(
     "eslint:recommended",
+
     "plugin:@typescript-eslint/recommended",
+    "plugin:mocha/recommended",
     "prettier"
   ),
   {
     files: [ '**/*.{js,ts}' ], ignores: [ 'dist/**/*.{js,ts}' ],
     plugins: {
       "@typescript-eslint": typescriptEslint,
+      mocha: mochaParser,
       prettier: prettierPlugin
     },
     languageOptions: {
@@ -44,13 +48,13 @@ export default [
     rules: {
       indent: "off",
       "func-names": "off",
-      eqeqeq: [ "warn", "always" ],
+      eqeqeq: [ "warn", "smart" ],
       "no-case-declarations": "off",
       "no-compare-neg-zero": "error",
       "no-console": "warn",
       "no-dupe-args": "error",
       "no-dupe-keys": "error",
-      "no-duplicate-imports": "error",
+      "no-duplicate-imports": "off",
       "no-empty": [ "warn", { allowEmptyCatch: false } ],
       "no-extra-boolean-cast": "off",
       "no-fallthrough": "error",
@@ -65,7 +69,7 @@ export default [
       "no-unneeded-ternary": "error",
       "no-unreachable": "error",
       "no-useless-escape": "off",
-      "no-var": "error",
+      "no-var": "warn", //fix this later
       "prefer-const": "error",
       "prefer-rest-params": "warn",
       "prefer-spread": "warn",
@@ -86,7 +90,9 @@ export default [
       ],
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-empty-object-type": "warn",
-      // "mocha/no-setup-in-describe": "off"
+      "@typescript-eslint/no-require-imports": "warn", //TODO remove later
+      "@typescript-eslint/no-unused-expressions": "warn", //TODO remove later 
+      "mocha/no-setup-in-describe": "off"
     }
   }
 

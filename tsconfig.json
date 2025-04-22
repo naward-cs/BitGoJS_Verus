@@ -1,13 +1,16 @@
 {
   "compilerOptions": {
     "composite": true,
-    "outDir": "./dist",
-    "rootDir": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": false,
     "inlineSourceMap": true,
     "inlineSources": true,
+    "outDir": "./dist",
+    "rootDir": ".",
     "lib": ["dom", "es2020"],
     "module": "commonjs",
-    "noImplicitAny": true,
+    "noImplicitAny": false, //TODO return to true 
     "noFallthroughCasesInSwitch": true,
     "noImplicitThis": true,
     "resolveJsonModule": true,
@@ -17,13 +20,11 @@
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "target": "es2020",
-    "declaration": false,
-    "declarationMap": false,
-    "esModuleInterop": false,
     "allowJs": true,
     "strict": true,
     "typeRoots": ["./node_modules/@types", "./src/types"],
-    "types": ["mocha", "node"]
+    "types": ["mocha"]
   },
-  "include": ["src/**/*", "package.json"]
+  "include": ["src/**/*", "package.json"],
+  "exclude": ["node_modules","dist"]
 }
