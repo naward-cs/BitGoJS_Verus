@@ -1,26 +1,33 @@
+;
 /**
  * @prettier
  */
 import * as assert from 'assert';
 
+
+
+import { isScriptType2Of3 } from '../../../src/bitgo/outputScripts';
+import { getMainnet, getNetworkName, isTestnet } from '../../../src/coins';
+import { Network } from '../../../src/types';
+import { wipeFixtures, writeTransactionFixtureWithInputs } from './fixtures';
+import { createScriptPubKey, createSpendTransaction, getKeyTriple, isSupportedDepositType, isSupportedSpendType, ScriptType, scriptTypes } from './outputScripts.util';
+import { getRegtestNode, getRegtestNodeUrl, Node } from './regtestNode';
+import { RpcClient } from './RpcClient';
+
+
+
+
+
 const utxolib = require('../../../src');
 
-import { Network } from '../../../src/networkTypes';
-import { getMainnet, getNetworkName, isTestnet } from '../../../src/coins';
 
-import { getRegtestNode, getRegtestNodeUrl, Node } from './regtestNode';
-import {
-  createScriptPubKey,
-  createSpendTransaction,
-  getKeyTriple,
-  isSupportedDepositType,
-  isSupportedSpendType,
-  ScriptType,
-  scriptTypes,
-} from './outputScripts.util';
-import { RpcClient } from './RpcClient';
-import { fixtureKeys, wipeFixtures, writeTransactionFixtureWithInputs } from './fixtures';
-import { isScriptType2Of3 } from '../../../src/bitgo/outputScripts';
+
+
+
+
+
+
+
 
 const wif = require("wif")
 

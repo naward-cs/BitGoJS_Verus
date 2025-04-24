@@ -1,10 +1,18 @@
+;
 /**
  * @prettier
  */
 /* global describe, it */
 import * as assert from 'assert';
+import type { Network } from '../src/types';
+
+
+
 import { coins, networks } from '../src';
-import { Network } from '../src/networkTypes';
+
+
+
+
 
 describe('networks', function () {
   // Ideally, all properties for all coins should be distinct.

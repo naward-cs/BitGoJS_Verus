@@ -1,10 +1,10 @@
-import { Network } from "../networkTypes";
+import type {Network} from '../types'
 
 /**
  * @prettier
  */
-const BigInteger = require('bigi');
-const ECPair = require('../ecpair');
+const BigInteger = require('bigi')
+const ECPair = require('../ecpair')
 
 /**
  * Create an ECPair from the raw private key bytes
@@ -14,11 +14,11 @@ const ECPair = require('../ecpair');
  */
 export function privateKeyBufferToECPair(buffer: Buffer[], network: Network) {
   if (!Buffer.isBuffer(buffer) || buffer.length !== 32) {
-    throw new Error('invalid private key buffer');
+    throw new Error('invalid private key buffer')
   }
 
-  const d = BigInteger.fromBuffer(buffer);
-  return new ECPair(d, null, { network });
+  const d = BigInteger.fromBuffer(buffer)
+  return new ECPair(d, null, {network})
 }
 
 /**
@@ -28,10 +28,10 @@ export function privateKeyBufferToECPair(buffer: Buffer[], network: Network) {
  */
 export function privateKeyBufferFromECPair(ecPair: typeof ECPair) {
   if (!(ecPair instanceof ECPair)) {
-    throw new TypeError(`invalid argument ecpair`);
+    throw new TypeError(`invalid argument ecpair`)
   }
 
-  if (!ecPair.d) throw new Error('Missing private key');
+  if (!ecPair.d) throw new Error('Missing private key')
 
-  return ecPair.d.toBuffer(32);
+  return ecPair.d.toBuffer(32)
 }

@@ -1,9 +1,14 @@
+;
 /**
  * @prettier
  */
 
-import { Network } from '../../../src/networkTypes';
-import { Input } from '../../../src/bitgo/signature';
+import {Input} from '../../../src/bitgo/signature'
+import {Network} from '../../../src/types'
+
+
+
+
 
 type Output = {
   value: number;

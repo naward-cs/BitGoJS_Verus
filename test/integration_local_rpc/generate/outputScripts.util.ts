@@ -1,13 +1,24 @@
+;
 /**
  * @prettier
  */
-import * as bip32 from 'bip32';
 import * as crypto from 'crypto';
-import { Network } from '../../../src/networkTypes';
-import { Transaction, Triple } from './types';
+
+
+
+import * as bip32 from 'bip32';
+
+
+
 import { createOutputScript2of3, ScriptType2Of3, scriptTypes2Of3 } from '../../../src/bitgo/outputScripts';
-import { getMainnet, isBitcoin, isBitcoinGold, isLitecoin, isVerus, isZcashCompatible } from '../../../src/coins';
 import { getDefaultSigHash } from '../../../src/bitgo/signature';
+import { getMainnet, isBitcoin, isBitcoinGold, isLitecoin, isVerus, isZcashCompatible } from '../../../src/coins';
+import { Network } from '../../../src/types';
+import { Transaction, Triple } from './types';
+
+
+
+
 
 const utxolib = require('../../../src');
 

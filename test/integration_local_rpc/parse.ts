@@ -1,25 +1,28 @@
+;
 /**
  * @prettier
  */
 import * as assert from 'assert';
+
+
+
 import * as bip32 from 'bip32';
 
-import { Network } from '../../src/networkTypes';
-import { isTestnet } from '../../src/coins';
-import { verifySignature, parseSignatureScript, Input } from '../../src/bitgo/signature';
 
-import {
-  createSpendTransactionFromPrevOutputs,
-  isSupportedDepositType,
-  isSupportedSpendType,
-  ScriptType,
-  scriptTypes,
-} from './generate/outputScripts.util';
-import { fixtureKeys, readFixture, TransactionFixtureWithInputs } from './generate/fixtures';
+
 import { isScriptType2Of3 } from '../../src/bitgo/outputScripts';
-import { Transaction } from './generate/types';
+import { parseSignatureScript, verifySignature } from '../../src/bitgo/signature';
+import { isTestnet } from '../../src/coins';
+import { Network } from '../../src/types';
 import { parseTransactionRoundTrip } from '../transaction_util';
 import { normalizeParsedTransaction, normalizeRpcTransaction } from './compare';
+import { fixtureKeys, readFixture, TransactionFixtureWithInputs } from './generate/fixtures';
+import { createSpendTransactionFromPrevOutputs, isSupportedDepositType, isSupportedSpendType, ScriptType, scriptTypes } from './generate/outputScripts.util';
+import { Transaction } from './generate/types';
+
+
+
+
 
 const utxolib = require('../../src');
 

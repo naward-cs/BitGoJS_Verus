@@ -1,15 +1,25 @@
+;
 /**
  * @prettier
  */
 import * as assert from 'assert';
-import * as fs from 'fs-extra';
 import * as path from 'path';
 
-import { Network } from '../../../src/networkTypes';
+
+
+import * as fs from 'fs-extra';
+
+
+
 import { getNetworkName } from '../../../src/coins';
+import { Network } from '../../../src/types';
+import { getKeyTriple } from './outputScripts.util';
 import { RpcClient } from './RpcClient';
 import { RpcTransaction } from './RpcTypes';
-import { getKeyTriple } from './outputScripts.util';
+
+
+
+
 
 export function getFixtureDir(network: Network): string {
   const networkName = getNetworkName(network);

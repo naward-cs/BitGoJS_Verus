@@ -1,6 +1,10 @@
-import {getMainnet} from '../networks/coins'
+import { getMainnet } from '../networks/coins';
 import * as networks from '../networks/networks'
-import {Network} from '../networkTypes'
+import {Network} from '../types'
+
+
+
+
 
 /**
  * @prettier

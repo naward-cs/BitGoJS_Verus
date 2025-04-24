@@ -1,10 +1,18 @@
+;
 /**
  * @prettier
  */
-import * as crypto from 'crypto';
 import { spawn } from 'child_process';
-import { Network } from '../../../src/networkTypes';
+import * as crypto from 'crypto';
+
+
+
 import { getNetworkName } from '../../../src/coins';
+import { Network } from '../../../src/types';
+
+
+
+
 
 const utxolib = require('../../../src');
 

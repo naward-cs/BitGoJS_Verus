@@ -1,10 +1,18 @@
+;
 /**
  * @prettier
  */
 import * as fs from 'fs-extra';
-import { Network } from '../../src/networkTypes';
+
+
+
 import { getMainnet, getNetworkName } from '../../src/coins';
 import * as networks from '../../src/networks';
+import { Network } from '../../src/types';
+
+
+
+
 
 export type FixtureInfo = {
   projectPath: string;

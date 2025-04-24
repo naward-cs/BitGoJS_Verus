@@ -1,8 +1,16 @@
+;
 /**
  * @prettier
  */
 import * as assert from 'assert';
-import { Network } from '../src/networkTypes';
+
+
+
+import { Network } from '../src/types';
+
+
+
+
 
 const Transaction = require('../src/transaction');
 

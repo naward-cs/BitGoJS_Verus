@@ -1,12 +1,22 @@
+;
 /**
  * @prettier
  */
-import * as fs from 'fs-extra';
 import * as childProcess from 'child_process';
 
-import { Network } from '../../src/networkTypes';
+
+
+import * as fs from 'fs-extra';
+
+
+
 import { getNetworkList, getNetworkName, isMainnet } from '../../src/coins';
-import { getArchiveUrl, getFixtureInfo, getArchiveRoot, sigHashTestFile, txValidTestFile } from './fixtures';
+import { Network } from '../../src/types';
+import { getArchiveRoot, getArchiveUrl, getFixtureInfo, sigHashTestFile, txValidTestFile } from './fixtures';
+
+
+
+
 
 function downloadAndUnpackTestFixtures(network: Network) {
   const fixtureInfo = getFixtureInfo(network);

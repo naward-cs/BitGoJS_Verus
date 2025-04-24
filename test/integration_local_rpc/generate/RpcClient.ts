@@ -1,13 +1,23 @@
+;
 /**
  * @prettier
  */
 import * as assert from 'assert';
+
+
+
 import axios, { AxiosError } from 'axios';
 import buildDebug from 'debug';
 
-import { Network } from '../../../src/networkTypes';
+
+
 import { getMainnet, getNetworkName, isZcashCompatible } from '../../../src/coins';
+import { Network } from '../../../src/types';
 import { RpcTransaction } from './RpcTypes';
+
+
+
+
 
 const utxolib = require('../../../src');
 
