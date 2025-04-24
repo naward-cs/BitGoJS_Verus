@@ -1,48 +1,49 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type {randomBytes} from 'crypto'
 
+
 declare module 'bigi' {
   interface RandomGenerator extends randomBytes {
     nextBytes(bytes: number[]): void
   }
 
-  declare class BigInteger {
+  declare class bigi {
     constructor(a?: any, b?: any, c?: any)
-    abs(): BigInteger
-    add(a: BigInteger): BigInteger
-    addTo(a: BigInteger, r: BigInteger): void
+    abs(): bigi
+    add(a: bigi): bigi
+    addTo(a: bigi, r: bigi): void
     am(
       i: number,
       x: number,
-      w: BigInteger,
+      w: bigi,
       j: number,
       c: number,
       n: number,
     ): number
-    and(a: BigInteger): BigInteger
-    andNot(a: BigInteger): BigInteger
+    and(a: bigi): bigi
+    andNot(a: bigi): bigi
     bitCount(): number
     bitLength(): number
-    bitwiseTo(a: BigInteger, op: any, r: BigInteger): void
+    bitwiseTo(a: bigi, op: any, r: bigi): void
     byteLength(): number
     byteValue(): number
-    changeBit(n: number, op: any): BigInteger
+    changeBit(n: number, op: any): bigi
     chunkSize(r: number): number
     clamp(): void
-    clearBit(n: number): BigInteger
-    clone(): BigInteger
-    compareTo(a: BigInteger): number
-    copyTo(r: BigInteger): void
+    clearBit(n: number): bigi
+    clone(): bigi
+    compareTo(a: bigi): number
+    copyTo(r: bigi): void
     dAddOffset(n: number, w: number): void
     dMultiply(n: number): void
-    divRemTo(m: BigInteger, q: BigInteger | null, r: BigInteger | null): void
-    divide(a: BigInteger): BigInteger
-    divideAndRemainder(a: BigInteger): BigInteger
-    dlShiftTo(n: BigInteger, r: number): void
-    drShiftTo(n: BigInteger, r: number): void
-    equals(a: BigInteger): boolean
-    exp(e: number, z: any): BigInteger
-    flipBit(n: number): BigInteger
+    divRemTo(m: bigi, q: bigi | null, r: bigi | null): void
+    divide(a: bigi): bigi
+    divideAndRemainder(a: bigi): bigi
+    dlShiftTo(n: bigi, r: number): void
+    drShiftTo(n: bigi, r: number): void
+    equals(a: bigi): boolean
+    exp(e: number, z: any): bigi
+    flipBit(n: number): bigi
     fromInt(x: number): void
     fromNumber(
       a: number,
@@ -51,40 +52,40 @@ declare module 'bigi' {
     ): void
     fromRadix(s: string | number[] | Buffer, b?: number | null): void
     fromString(s: string, b: number | null): void
-    gcd(a: BigInteger): BigInteger
+    gcd(a: bigi): bigi
     getLowestSetBit(): number
     intValue(): number
     invDigit(): number
     isEven(): boolean
     isProbablePrime(t?: number): boolean
-    lShiftTo(n: number, r: BigInteger): void
-    max(a: BigInteger): BigInteger
-    millerRabin(t: BigInteger): BigInteger
-    min(a: BigInteger): BigInteger
-    mod(a: BigInteger): BigInteger
-    modInt(n: number): BigInteger
-    modInverse(m: BigInteger): BigInteger
-    modPow(e: BigInteger, m: BigInteger): BigInteger
-    modPowInt(e: BigInteger, m: BigInteger): BigInteger
-    multiply(a: BigInteger): BigInteger
-    multiplyLowerTo(a: BigInteger, n: number, r: BigInteger): void
-    multiplyTo(a: BigInteger, r: BigInteger): void
-    multiplyUpperTo(a: BigInteger, n: number, r: BigInteger): void
-    negate(): BigInteger
-    not(): BigInteger
-    or(a: BigInteger): BigInteger
-    pow(e: BigInteger): BigInteger
-    rShiftTo(n: number, r: BigInteger): void
-    remainder(a: BigInteger): BigInteger
-    setBit(n: number): BigInteger
-    shiftLeft(n: number): BigInteger
-    shiftRight(n: number): BigInteger
-    shortValue(): BigInteger
+    lShiftTo(n: number, r: bigi): void
+    max(a: bigi): bigi
+    millerRabin(t: bigi): bigi
+    min(a: bigi): bigi
+    mod(a: bigi): bigi
+    modInt(n: number): bigi
+    modInverse(m: bigi): bigi
+    modPow(e: bigi, m: bigi): bigi
+    modPowInt(e: bigi, m: bigi): bigi
+    multiply(a: bigi): bigi
+    multiplyLowerTo(a: bigi, n: number, r: bigi): void
+    multiplyTo(a: bigi, r: bigi): void
+    multiplyUpperTo(a: bigi, n: number, r: bigi): void
+    negate(): bigi
+    not(): bigi
+    or(a: bigi): bigi
+    pow(e: bigi): bigi
+    rShiftTo(n: number, r: bigi): void
+    remainder(a: bigi): bigi
+    setBit(n: number): bigi
+    shiftLeft(n: number): bigi
+    shiftRight(n: number): bigi
+    shortValue(): bigi
     signum(): number
-    square(): BigInteger
-    squareTo(r: BigInteger): void
-    subTo(a: BigInteger, r: BigInteger): void
-    subtract(a: BigInteger): BigInteger
+    square(): bigi
+    squareTo(r: bigi): void
+    subTo(a: bigi, r: bigi): void
+    subtract(a: bigi): bigi
     testBit(n: number): boolean
     toBuffer(size?: number): Buffer
     toByteArray(): number[] | Uint8Array
@@ -93,20 +94,20 @@ declare module 'bigi' {
     toHex(size?: number): string
     toRadix(b: number): string
     toString(b?: number): string
-    xor(a: BigInteger): BigInteger
-    static fromBuffer(buffer: Buffer): BigInteger
+    xor(a: bigi): bigi
+    static fromBuffer(buffer: Buffer): bigi
     static fromByteArrayUnsigned(
       byteArray?: Buffer | Uint8Array | number[],
     ): number[]
     static fromDERInteger(
       byteArray?: Buffer | Uint8Array | number[],
-    ): BigInteger
-    static fromHex(hex: string): BigInteger
-    static isBigInteger(obj: unknown, check_ver: any): obj is BigInteger
-    static valueOf(i: number): BigInteger
+    ): bigi
+    static fromHex(hex: string): bigi
+    static isbigi(obj: unknown, check_ver: any): obj is bigi
+    static valueOf(i: number): bigi
   }
 
-  declare namespace BigInteger {
+  declare namespace bigi {
     interface Constants {
       readonly DB: number
       readonly DM: number
@@ -117,7 +118,7 @@ declare module 'bigi' {
       readonly s: number
       readonly t: number
     }
-    const ONE: BigInteger & Constants
-    const ZERO: BigInteger & Constants
+    const ONE: bigi & Constants
+    const ZERO: bigi & Constants
   }
 }
