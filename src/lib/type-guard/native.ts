@@ -15,7 +15,9 @@ export function isObject(value: unknown): value is Record<string, any> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
 
-export function isNil(value: unknown | null): value is null | undefined {
+export function isNil(
+  value: unknown | null,
+): value is null | 'null' | undefined {
   return typeof value === 'undefined' || value === 'null'
 }
 

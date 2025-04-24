@@ -1,6 +1,4 @@
-import type {ValidFn} from './valid'
-
-import {isNumber} from './native'
+import type {ValidFn} from '../../types/types-guard'
 
 export function isFinite(value: unknown): value is number {
   return Number.isFinite(value)
@@ -61,12 +59,20 @@ export function isUInt53(value: unknown): value is number {
   )
 }
 
-export function range(a: number, b: number, fn: ValidFn = isNumber): void {
-  function _range(value: unknown, strict?: boolean): boolean {
+function isNumberOrBigInt(value: unknown): value is number | bigint {
+  return typeof value === 'number' || typeof value === 'bigint'
+}
+
+export function range<T extends number | bigint>(
+  a: T,
+  b: T,
+  fn: ValidFn<T> = isNumberOrBigInt as ValidFn<T>,
+): void {
+  function _range(value: unknown, strict?: boolean): value is T {
     if (strict) {
-      return isFinite(value) && fn(value) && value > a && value < b
+      return isNumberOrBigInt(value) && fn(value) && value > a && value < b
     }
-    return isNumber(value) && fn(value) && value > a && value < b
+    return isNumberOrBigInt(value) && fn(value) && value > a && value < b
   }
   _range.toJSON = function (): string {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

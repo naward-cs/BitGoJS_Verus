@@ -1,20 +1,23 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type {ObjectSchema, ValidFn} from '../../types/types-guard'
+
 import {isArray} from './native'
+import {getCallerName} from './util'
 
-type ValidFnWithoutStrict = (value: any) => boolean
-type ValidFnWithStrict = (value: any, strict?: boolean) => boolean
-
-export type ValidFn = ValidFnWithoutStrict | ValidFnWithStrict
-
-function isValid(validFn: ValidFn, arg: unknown, strict?: boolean): boolean
-
-function isValid<T extends any[]>(
-  validFns: ValidFn[],
-  args: T,
+function isValid<K>(
+  validFn: ValidFn<K>,
+  arg: unknown,
   strict?: boolean,
 ): boolean
 
 function isValid<T extends any[]>(
-  fn: ValidFn | ValidFn[],
+  validFns: ValidFn<T[number]>[],
+  args: T,
+  strict?: boolean,
+): boolean
+
+function isValid<K, T extends any[]>(
+  fn: ValidFn<K> | ValidFn<T[number]>[],
   argsOrArgs: unknown | T,
   strict?: boolean,
 ): boolean {
@@ -41,37 +44,47 @@ function isValid<T extends any[]>(
     const fnNames = Array.isArray(fn)
       ? fn.map(f => f.name || 'anonymous function').join(', ')
       : fn.name || 'anonymous function'
-    throw new Error(`Validation error in ${fnNames}: ${error.message || error}`)
+
+    // Get caller's name from the stack trace
+    const callerName = getCallerName()
+    const callerPrefix = callerName ? `${callerName}: ` : ''
+    throw new Error(
+      `${callerPrefix}Validation error in ${fnNames}: ${error.message || error}`,
+    )
     // console.error(`Validation error in ${fnNames}`, error.meesage || error)
     // return false
   }
 }
 
-function oneOf(fns: ValidFn[], value: unknown): boolean {
-  const passingValidations = fns.filter(fn => fn(value))
-  return passingValidations.length === 1
+function isValidateProp<K extends keyof T, T>(
+  obj: Partial<T>,
+  propertyName: K,
+  validator: ValidFn<T[K]>,
+): boolean {
+  return validator(obj[propertyName])
 }
 
-// function anyOf(fns: ValidFn[], value: unknown): boolean {
-//   return fns.some(fn => fn(value))
-// }
-
-function anyOf(...fns: ValidFn[]): ValidFn {
-  return (value: unknown) => {
-    return fns.some(fn => {
-      try {
-        fn(value)
-      } catch (_) {}
-    })
+function isValidObject<T>(schema: ObjectSchema<T>, obj: Partial<T>): boolean {
+  for (const key in schema) {
+    if (!isValidateProp(obj, key, schema[key])) {
+      return false // Return false if any property fails
+    }
   }
+  return false
 }
 
-function allOf(fns: ValidFn[], value: unknown): boolean {
-  return fns.every(fn => {
-    try {
-      fn(value)
-    } catch (_) {}
-  })
-}
+export {isValid, isValidateProp, isValidObject}
 
-export {allOf, anyOf, isValid, oneOf}
+// type Person = {
+//   name?: string
+//   age: number
+// }
+// const person1: Partial<Person> = { name: 'Alice' };
+// const person2: Partial<Person> = {age: 30}
+// const person3: Partial<Person> = {name: 123}
+// const person4: Partial<Person> = {age: 'test'}
+
+// console.log(validateProperty(person1, 'name', maybe(isString))) // true
+// console.log(validateProperty(person2, 'age', isNumber)) // true
+// console.log(validateProperty(person3, 'name', maybe(isString))) // false
+// console.log(validateProperty(person4, 'age', isNumber)) // false

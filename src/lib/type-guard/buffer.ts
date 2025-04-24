@@ -2,6 +2,9 @@ import {BufferN} from './length'
 import {isString} from './native'
 
 export function isBuffer(value: unknown): value is Buffer {
+  if (typeof Buffer === 'undefined')
+    throw new Error('Buffer is required for this environment')
+
   return Buffer.isBuffer(value)
 }
 
@@ -14,24 +17,17 @@ export function isBufferArray(value: unknown): value is Buffer[] {
 }
 
 export function isHash160bit(value: unknown): value is Buffer {
-  if (typeof Buffer === 'undefined')
-    throw new Error('Buffer is required for this environment')
-  const hash160Check = BufferN(20)
-
-  return hash160Check(value)
+  return BufferN(20, 'isHash160bit')(value)
 }
 
 export function isHash256bit(value: unknown): value is Buffer {
-  if (typeof Buffer === 'undefined')
-    throw new Error('Buffer is required for this environment')
-  const hash256Check = BufferN(32)
-
-  return hash256Check(value)
+  return BufferN(32, 'isHash256bit')(value)
 }
 
 export function isBuffer256bit(value: unknown): value is Buffer {
-  if (typeof Buffer === 'undefined')
-    throw new Error('Buffer is required for this environment')
-  const buffer256Check = BufferN(32)
-  return buffer256Check(value)
+  return BufferN(32, 'isHash256bit')(value)
+}
+
+export function isBufferN64(value: unknown): value is Buffer {
+  return BufferN(64, 'isBufferN64')(value)
 }

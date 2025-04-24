@@ -51,7 +51,7 @@ export default [
       eqeqeq: [ "warn", "smart" ],
       "no-case-declarations": "off",
       "no-compare-neg-zero": "error",
-      "no-console": "warn",
+      'no-console': [ 'error', { allow: [ 'warn', 'error', 'info' ] } ],
       "no-dupe-args": "error",
       "no-dupe-keys": "error",
       "no-duplicate-imports": "off",
