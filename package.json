@@ -65,7 +65,6 @@
     "ecurve": "1.0.6",
     "es-toolkit": "^1.36.0",
     "merkle-lib": "2.0.10",
-    "pushdata-bitcoin": "1.0.1",
     "randombytes": "2.1.0",
     "typeforce": "1.18.0",
     "varuint-bitcoin": "2.0.0",
