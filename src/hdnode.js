@@ -4,7 +4,7 @@ var bcrypto = require('./crypto')
 var createHmac = require('create-hmac')
 var typeforce = require('typeforce')
 var types = require('./types')
-var NETWORKS = require('./networks')
+var NETWORKS = require('./networks/networks')
 
 var BigInteger = require('bigi')
 var ECPair = require('./ecpair')

@@ -3,7 +3,7 @@ var bech32 = require('bech32')
 var bs58check = require('bs58check')
 var bscript = require('./script')
 var btemplates = require('./templates')
-var networks = require('./networks')
+var networks = require('./networks/networks')
 var typeforce = require('typeforce')
 var types = require('./types')
 

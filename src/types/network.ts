@@ -1,9 +1,9 @@
 import type {coins} from '../networks'
 import type {Prettify} from './prettify'
 
-/** @deprecated */
+// /** @deprecated */
 export type CoinKey = keyof typeof coins
-/** @deprecated */
+// /** @deprecated */
 export type Coin = (typeof coins)[CoinKey]
 
 export type NetworkName =
@@ -52,27 +52,35 @@ export type BaseNetwork = {
   forkId?: number
 }
 
-export type ZcashNetwork = BaseNetwork & {
-  consensusBranchId: Record<number, number>
-  isZcashCompatible: boolean
-}
-
-export type PBaaSNetwork = Required<ZcashNetwork> & {
-  verusID: number
-  isPBaaS: boolean
-}
-
-export type PBaaSType = Prettify<PBaaSNetwork>
-
-export type DigiDogeNetwork = BaseNetwork & {
-  bip44: number
-  dustThreshold: number
-}
-
-export type BitcoinCashNetwork = BaseNetwork & {
-  cashAddr: {
-    prefix: string
-    pubKeyHash: number
-    scriptHash: number
+export type ZcashNetwork = Prettify<
+  BaseNetwork & {
+    consensusBranchId: Record<number, number>
+    isZcashCompatible: boolean
   }
-}
+>
+
+export type PBaaSNetwork = Prettify<
+  ZcashNetwork & {
+    bech32: string
+    verusID: number
+    isPBaaS: boolean
+  }
+>
+// export type PBaaSType = PBaaSNetwork
+
+export type DigiDogeNetwork = Prettify<
+  BaseNetwork & {
+    bip44: number
+    dustThreshold: number
+  }
+>
+
+export type BitcoinCashNetwork = Prettify<
+  BaseNetwork & {
+    cashAddr: {
+      prefix: string
+      pubKeyHash: number
+      scriptHash: number
+    }
+  }
+>

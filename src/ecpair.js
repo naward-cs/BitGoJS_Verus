@@ -6,7 +6,7 @@ var typeforce = require('typeforce')
 var types = require('./types')
 var wif = require('wif')
 
-var NETWORKS = require('./networks')
+var NETWORKS = require('./networks/networks')
 var BigInteger = require('bigi')
 
 var EC = require('elliptic').ec

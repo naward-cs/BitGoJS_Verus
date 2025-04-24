@@ -1,24 +1,25 @@
+import {getMainnet} from '../networks/coins'
+import * as networks from '../networks/networks'
+import {Network} from '../networkTypes'
+
 /**
  * @prettier
  */
-const opcodes = require('bitcoin-ops');
+const opcodes = require('bitcoin-ops')
 
-const script = require("../script");
-const crypto = require("../crypto");
-const ECPair = require("../ecpair");
-const Transaction = require("../transaction");
-const ECSignature = require("../ecsignature");
-import { Network } from '../networkTypes';
-import * as networks from '../networks';
-import { getMainnet } from '../coins';
+const script = require('../script')
+const crypto = require('../crypto')
+const ECPair = require('../ecpair')
+const Transaction = require('../transaction')
+const ECSignature = require('../ecsignature')
 
 export interface Input {
-  hash: Buffer;
-  index: number;
-  sequence: number;
-  witness: Buffer;
-  script: Buffer;
-  signScript: Buffer;
+  hash: Buffer
+  index: number
+  sequence: number
+  witness: Buffer
+  script: Buffer
+  signScript: Buffer
 }
 
 const inputTypes = [
@@ -31,16 +32,16 @@ const inputTypes = [
   'witnesspubkeyhash',
   'witnessscripthash',
   'witnesscommitment',
-] as const;
+] as const
 
-type InputType = typeof inputTypes[number];
+type InputType = (typeof inputTypes)[number]
 
 export interface ParsedSignatureScript {
-  isSegwitInput: boolean;
-  inputClassification: InputType;
-  signatures?: Buffer[];
-  publicKeys?: Buffer[];
-  pubScript?: Buffer;
+  isSegwitInput: boolean
+  inputClassification: InputType
+  signatures?: Buffer[]
+  publicKeys?: Buffer[]
+  pubScript?: Buffer
 }
 
 export function getDefaultSigHash(network: Network): number {
@@ -48,9 +49,9 @@ export function getDefaultSigHash(network: Network): number {
     case networks.bitcoincash:
     case networks.bitcoinsv:
     case networks.bitcoingold:
-      return Transaction.SIGHASH_ALL | Transaction.SIGHASH_BITCOINCASHBIP143;
+      return Transaction.SIGHASH_ALL | Transaction.SIGHASH_BITCOINCASHBIP143
     default:
-      return Transaction.SIGHASH_ALL;
+      return Transaction.SIGHASH_ALL
   }
 }
 
@@ -64,32 +65,41 @@ export function getDefaultSigHash(network: Network): number {
  * @returns ParsedSignatureScript
  */
 export function parseSignatureScript(input: Input): ParsedSignatureScript {
-  const isSegwitInput = input.witness.length > 0;
-  const isNativeSegwitInput = input.script.length === 0;
-  let decompiledSigScript, inputClassification;
+  const isSegwitInput = input.witness.length > 0
+  const isNativeSegwitInput = input.script.length === 0
+  let decompiledSigScript, inputClassification
   if (isSegwitInput) {
     // The decompiledSigScript is the script containing the signatures, public keys, and the script that was committed
     // to (pubScript). If this is a segwit input the decompiledSigScript is in the witness, regardless of whether it
     // is native or not. The inputClassification is determined based on whether or not the input is native to give an
     // accurate classification. Note that p2shP2wsh inputs will be classified as p2sh and not p2wsh.
-    decompiledSigScript = input.witness;
+    decompiledSigScript = input.witness
     if (isNativeSegwitInput) {
-      inputClassification = script.classifyWitness(script.compile(decompiledSigScript), true);
+      inputClassification = script.classifyWitness(
+        script.compile(decompiledSigScript),
+        true,
+      )
     } else {
-      inputClassification = script.classifyInput(input.script, true);
+      inputClassification = script.classifyInput(input.script, true)
     }
   } else {
-    inputClassification = script.classifyInput(input.script, true);
-    decompiledSigScript = script.decompile(input.script);
+    inputClassification = script.classifyInput(input.script, true)
+    decompiledSigScript = script.decompile(input.script)
   }
 
   if (inputClassification === script.types.P2PKH) {
-    const [signature, publicKey] = decompiledSigScript;
-    const publicKeys = [publicKey];
-    const signatures = [signature];
-    const pubScript = script.pubKeyHash.output.encode(crypto.hash160(publicKey));
+    const [signature, publicKey] = decompiledSigScript
+    const publicKeys = [publicKey]
+    const signatures = [signature]
+    const pubScript = script.pubKeyHash.output.encode(crypto.hash160(publicKey))
 
-    return { isSegwitInput, inputClassification, signatures, publicKeys, pubScript };
+    return {
+      isSegwitInput,
+      inputClassification,
+      signatures,
+      publicKeys,
+      pubScript,
+    }
   }
 
   // Note the assumption here that if we have a p2sh or p2wsh input it will be multisig (appropriate because the
@@ -101,48 +111,59 @@ export function parseSignatureScript(input: Input): ParsedSignatureScript {
   //
   // decompiledSigScript = 0 <sig1> [<sig2>] <pubScript>
   // decompiledPubScript = 2 <pub1> <pub2> <pub3> 3 OP_CHECKMULTISIG
-  const expectedScriptType = inputClassification === script.types.P2SH || inputClassification === script.types.P2WSH;
+  const expectedScriptType =
+    inputClassification === script.types.P2SH ||
+    inputClassification === script.types.P2WSH
   const expectedScriptLength =
     decompiledSigScript.length === 4 || // single signature
-    decompiledSigScript.length === 5; // double signature
+    decompiledSigScript.length === 5 // double signature
 
   if (!expectedScriptType || !expectedScriptLength) {
-    return { isSegwitInput, inputClassification };
+    return {isSegwitInput, inputClassification}
   }
 
-  const signatures = decompiledSigScript.slice(0, -1);
-  const pubScript = decompiledSigScript[decompiledSigScript.length - 1];
-  const decompiledPubScript = script.decompile(pubScript);
+  const signatures = decompiledSigScript.slice(0, -1)
+  const pubScript = decompiledSigScript[decompiledSigScript.length - 1]
+  const decompiledPubScript = script.decompile(pubScript)
   if (decompiledPubScript.length !== 6) {
-    throw new Error(`unexpected decompiledPubScript length`);
+    throw new Error(`unexpected decompiledPubScript length`)
   }
-  const publicKeys = decompiledPubScript.slice(1, -2);
+  const publicKeys = decompiledPubScript.slice(1, -2)
 
   // Op codes 81 through 96 represent numbers 1 through 16 (see https://en.bitcoin.it/wiki/Script#Opcodes), which is
   // why we subtract by 80 to get the number of signatures (n) and the number of public keys (m) in an n-of-m setup.
-  const len = decompiledPubScript.length;
-  const nSignatures = decompiledPubScript[0] - 80;
-  const nPubKeys = decompiledPubScript[len - 2] - 80;
+  const len = decompiledPubScript.length
+  const nSignatures = decompiledPubScript[0] - 80
+  const nPubKeys = decompiledPubScript[len - 2] - 80
 
   // Due to a bug in the implementation of multisignature in the bitcoin protocol, a 0 is added to the signature
   // script, so we add 1 when asserting the number of signatures matches the number of signatures expected by the
   // pub script. Also, note that we consider a signature script with the the same number of signatures as public
   // keys (+1 as noted above) valid because we use placeholder signatures when parsing a half-signed signature
   // script.
-  if (signatures.length !== nSignatures + 1 && signatures.length !== nPubKeys + 1) {
-    throw new Error(`expected ${nSignatures} or ${nPubKeys} signatures, got ${signatures.length - 1}`);
+  if (
+    signatures.length !== nSignatures + 1 &&
+    signatures.length !== nPubKeys + 1
+  ) {
+    throw new Error(
+      `expected ${nSignatures} or ${nPubKeys} signatures, got ${signatures.length - 1}`,
+    )
   }
 
   if (publicKeys.length !== nPubKeys) {
-    throw new Error(`expected ${nPubKeys} public keys, got ${publicKeys.length}`);
+    throw new Error(
+      `expected ${nPubKeys} public keys, got ${publicKeys.length}`,
+    )
   }
 
-  const lastOpCode = decompiledPubScript[len - 1];
+  const lastOpCode = decompiledPubScript[len - 1]
   if (lastOpCode !== opcodes.OP_CHECKMULTISIG) {
-    throw new Error(`expected opcode #${opcodes.OP_CHECKMULTISIG}, got opcode #${lastOpCode}`);
+    throw new Error(
+      `expected opcode #${opcodes.OP_CHECKMULTISIG}, got opcode #${lastOpCode}`,
+    )
   }
 
-  return { isSegwitInput, inputClassification, signatures, publicKeys, pubScript };
+  return {isSegwitInput, inputClassification, signatures, publicKeys, pubScript}
 }
 
 /**
@@ -160,48 +181,58 @@ export function verifySignature(
   inputIndex: number,
   amount: number,
   verificationSettings: {
-    signatureIndex?: number;
-    publicKey?: Buffer | string;
-  } = {}
+    signatureIndex?: number
+    publicKey?: Buffer | string
+  } = {},
 ): boolean {
   if (typeof verificationSettings.publicKey === 'string') {
     return verifySignature(transaction, inputIndex, amount, {
       signatureIndex: verificationSettings.signatureIndex,
       publicKey: Buffer.from(verificationSettings.publicKey, 'hex'),
-    });
+    })
   }
 
   /* istanbul ignore next */
   if (!transaction.ins) {
-    throw new Error(`invalid transaction`);
+    throw new Error(`invalid transaction`)
   }
 
-  const input = transaction.ins[inputIndex];
+  const input = transaction.ins[inputIndex]
   /* istanbul ignore next */
   if (!input) {
-    throw new Error(`no input at index ${inputIndex}`);
+    throw new Error(`no input at index ${inputIndex}`)
   }
 
-  const { signatures, publicKeys, isSegwitInput, inputClassification, pubScript } = parseSignatureScript(input);
+  const {
+    signatures,
+    publicKeys,
+    isSegwitInput,
+    inputClassification,
+    pubScript,
+  } = parseSignatureScript(input)
 
-  if (![script.types.P2WSH, script.types.P2SH, script.types.P2PKH].includes(inputClassification)) {
-    return false;
+  if (
+    ![script.types.P2WSH, script.types.P2SH, script.types.P2PKH].includes(
+      inputClassification,
+    )
+  ) {
+    return false
   }
 
   if (!publicKeys || publicKeys.length === 0) {
-    return false;
+    return false
   }
 
   if (isSegwitInput && !amount) {
-    return false;
+    return false
   }
 
   if (!signatures) {
-    return false;
+    return false
   }
 
   // get the first non-empty signature and verify it against all public keys
-  const nonEmptySignatures = signatures.filter((s) => s.length > 0);
+  const nonEmptySignatures = signatures.filter(s => s.length > 0)
 
   /*
   We either want to verify all signature/pubkey combinations, or do an explicit combination
@@ -215,68 +246,84 @@ export function verifySignature(
   If neither is specified, all signatures are checked against all public keys. Each signature must have its own distinct
   public key that it matches for the function to return true.
    */
-  let signaturesToCheck = nonEmptySignatures;
+  let signaturesToCheck = nonEmptySignatures
   if (verificationSettings.signatureIndex !== undefined) {
-    signaturesToCheck = [nonEmptySignatures[verificationSettings.signatureIndex]];
+    signaturesToCheck = [
+      nonEmptySignatures[verificationSettings.signatureIndex],
+    ]
   }
 
-  let areAllSignaturesValid = true;
+  let areAllSignaturesValid = true
 
   // go over all signatures
   for (const signatureBuffer of signaturesToCheck) {
-    let isSignatureValid = false;
+    let isSignatureValid = false
 
-    const hasSignatureBuffer = Buffer.isBuffer(signatureBuffer) && signatureBuffer.length > 0;
-    if (hasSignatureBuffer && Buffer.isBuffer(pubScript) && pubScript.length > 0) {
+    const hasSignatureBuffer =
+      Buffer.isBuffer(signatureBuffer) && signatureBuffer.length > 0
+    if (
+      hasSignatureBuffer &&
+      Buffer.isBuffer(pubScript) &&
+      pubScript.length > 0
+    ) {
       // slice the last byte from the signature hash input because it's the hash type
-      const signature = ECSignature.fromDER(signatureBuffer.slice(0, -1));
-      const hashType = signatureBuffer[signatureBuffer.length - 1];
+      const signature = ECSignature.fromDER(signatureBuffer.slice(0, -1))
+      const hashType = signatureBuffer[signatureBuffer.length - 1]
       if (!hashType) {
         // missing hashType byte - signature cannot be validated
-        return false;
+        return false
       }
       const signatureHash = transaction.hashForSignatureByNetwork(
         inputIndex,
         pubScript,
         amount,
         hashType,
-        isSegwitInput
-      );
+        isSegwitInput,
+      )
 
-      let matchedPublicKeyIndices = (new Array<boolean>(publicKeys.length)).fill(false);
-      
-      for (let publicKeyIndex = 0; publicKeyIndex < publicKeys.length; publicKeyIndex++) {
-        const publicKeyBuffer = publicKeys[publicKeyIndex];
-        if (verificationSettings.publicKey !== undefined && !publicKeyBuffer.equals(verificationSettings.publicKey)) {
+      let matchedPublicKeyIndices = new Array<boolean>(publicKeys.length).fill(
+        false,
+      )
+
+      for (
+        let publicKeyIndex = 0;
+        publicKeyIndex < publicKeys.length;
+        publicKeyIndex++
+      ) {
+        const publicKeyBuffer = publicKeys[publicKeyIndex]
+        if (
+          verificationSettings.publicKey !== undefined &&
+          !publicKeyBuffer.equals(verificationSettings.publicKey)
+        ) {
           // we are only looking to verify one specific public key's signature (publicKeyHex)
           // this particular public key is not the one whose signature we're trying to verify
-          continue;
+          continue
         }
 
         if (matchedPublicKeyIndices[publicKeyIndex]) {
-          continue;
+          continue
         }
 
-        const publicKey = ECPair.fromPublicKeyBuffer(publicKeyBuffer);
+        const publicKey = ECPair.fromPublicKeyBuffer(publicKeyBuffer)
         if (publicKey.verify(signatureHash, signature)) {
-          isSignatureValid = true;
-          matchedPublicKeyIndices[publicKeyIndex] = true;
-          break;
+          isSignatureValid = true
+          matchedPublicKeyIndices[publicKeyIndex] = true
+          break
         }
       }
     }
 
     if (verificationSettings.publicKey !== undefined && isSignatureValid) {
       // We were trying to see if any of the signatures was valid for the given public key. Evidently yes.
-      return true;
+      return true
     }
 
     if (!isSignatureValid && verificationSettings.publicKey === undefined) {
-      return false;
+      return false
     }
 
-    areAllSignaturesValid = isSignatureValid && areAllSignaturesValid;
+    areAllSignaturesValid = isSignatureValid && areAllSignaturesValid
   }
 
-  return areAllSignaturesValid;
+  return areAllSignaturesValid
 }

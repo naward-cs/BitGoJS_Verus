@@ -23,9 +23,9 @@ module.exports = {
 
   smarttxs: require('./smart_transactions'),
   address: require('./address'),
-  coins: require('./coins'),
+  coins: require('./networks/coins'),
   crypto: require('./crypto'),
-  networks: require('./networks'),
+  networks: require('./networks/networks'),
   opcodes: require('bitcoin-ops'),
   script: script
 }

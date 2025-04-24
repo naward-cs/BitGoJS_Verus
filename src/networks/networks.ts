@@ -1,7 +1,3 @@
-/**
- * @prettier
- */
-
 /*
 
 The values for the various fork coins can be found in these files:
@@ -19,7 +15,26 @@ forkId         src/script/interpreter.h  FORKID_*
 
 */
 
-import { coins, BitcoinCashNetwork, Network, NetworkName, ZcashNetwork, PBaaSNetwork, DigiDogeNetwork } from './networkTypes';
+import type {Network, NetworkName} from '../types'
+import {Prettify} from '../types/prettify'
+
+// /**
+//  * @deprecated
+//  */
+export const coins = {
+  BCH: 'bch',
+  BSV: 'bsv',
+  BTC: 'btc',
+  BTG: 'btg',
+  LTC: 'ltc',
+  ZEC: 'zec',
+  DASH: 'dash',
+  VRSC: 'vrsc',
+  DEFAULT: 'default',
+  KMD: 'kmd',
+  DGB: 'dgb',
+  DOGE: 'doge',
+} as const
 
 function getDefaultBip32Mainnet(): Network['bip32'] {
   return {
@@ -27,13 +42,13 @@ function getDefaultBip32Mainnet(): Network['bip32'] {
     public: 0x0488b21e,
     // base58 'xprv'
     private: 0x0488ade4,
-  };
+  }
 }
 
 function getDogeBip32Mainnet(): Network['bip32'] {
   return {
     public: 0x02facafd,
-    private: 0x02fac398
+    private: 0x02fac398,
   }
 }
 
@@ -43,14 +58,10 @@ function getDefaultBip32Testnet(): Network['bip32'] {
     public: 0x043587cf,
     // base58 'tprv'
     private: 0x04358394,
-  };
+  }
 }
 
-const networks: Record<NetworkName, Network> &
-  Record<'zcash' | 'zcashTest', ZcashNetwork> &
-  Record<'verus' | 'verustest' | 'default' | 'kmd', PBaaSNetwork> &
-  Record<'digibyte' | 'doge', DigiDogeNetwork> &
-  Record<'bitcoincash' | 'bitcoincashTestnet', BitcoinCashNetwork> = {
+export const networks: Prettify<Record<NetworkName,Network>> = {
   // https://github.com/bitcoin/bitcoin/blob/master/src/validation.cpp
   // https://github.com/bitcoin/bitcoin/blob/master/src/chainparams.cpp
   bitcoin: {
@@ -173,16 +184,16 @@ const networks: Record<NetworkName, Network> &
     pubKeyHash: 0x3c,
     scriptHash: 0x55,
     verusID: 0x66,
-    wif: 0xBC,
+    wif: 0xbc,
     consensusBranchId: {
       1: 0x00,
       2: 0x00,
       3: 0x5ba81b19,
-      4: 0x76b809bb
+      4: 0x76b809bb,
     },
     coin: coins.DEFAULT,
     isPBaaS: true,
-    isZcashCompatible: true
+    isZcashCompatible: true,
   },
 
   digibyte: {
@@ -193,7 +204,7 @@ const networks: Record<NetworkName, Network> &
     scriptHash: 0x5,
     wif: 0x80,
     coin: coins.DGB,
-    dustThreshold: 1000
+    dustThreshold: 1000,
   },
 
   doge: {
@@ -204,7 +215,7 @@ const networks: Record<NetworkName, Network> &
     scriptHash: 0x16,
     wif: 0x9e,
     coin: coins.DOGE,
-    dustThreshold: 0 // https://github.com/dogecoin/dogecoin/blob/v1.7.1/src/core.h#L155-L160
+    dustThreshold: 0, // https://github.com/dogecoin/dogecoin/blob/v1.7.1/src/core.h#L155-L160
   },
 
   kmd: {
@@ -214,16 +225,16 @@ const networks: Record<NetworkName, Network> &
     pubKeyHash: 0x3c,
     scriptHash: 0x55,
     verusID: 0x66,
-    wif: 0xBC,
+    wif: 0xbc,
     consensusBranchId: {
       1: 0x00,
       2: 0x00,
       3: 0x5ba81b19,
-      4: 0x76b809bb
+      4: 0x76b809bb,
     },
     coin: coins.KMD,
     isPBaaS: false,
-    isZcashCompatible: true
+    isZcashCompatible: true,
   },
 
   // https://github.com/litecoin-project/litecoin/blob/master/src/validation.cpp
@@ -254,16 +265,16 @@ const networks: Record<NetworkName, Network> &
     pubKeyHash: 0x3c,
     scriptHash: 0x55,
     verusID: 0x66,
-    wif: 0xBC,
+    wif: 0xbc,
     consensusBranchId: {
       1: 0x00,
       2: 0x00,
       3: 0x5ba81b19,
-      4: 0x76b809bb
+      4: 0x76b809bb,
     },
     coin: coins.VRSC,
     isPBaaS: true,
-    isZcashCompatible: true
+    isZcashCompatible: true,
   },
 
   verustest: {
@@ -273,16 +284,16 @@ const networks: Record<NetworkName, Network> &
     pubKeyHash: 0x3c,
     scriptHash: 0x55,
     verusID: 0x66,
-    wif: 0xBC,
+    wif: 0xbc,
     consensusBranchId: {
       1: 0x00,
       2: 0x00,
       3: 0x5ba81b19,
-      4: 0x76b809bb
+      4: 0x76b809bb,
     },
     coin: coins.VRSC,
     isPBaaS: true,
-    isZcashCompatible: true
+    isZcashCompatible: true,
   },
 
   // https://github.com/zcash/zcash/blob/master/src/validation.cpp
@@ -304,10 +315,10 @@ const networks: Record<NetworkName, Network> &
       // 4: 0xf5b9230b (Heartwood branch id, see https://zips.z.cash/zip-0250)
       // 4: 0xe9ff75a6, // (Canopy branch id, see https://zips.z.cash/zip-0251)
       // 4: 0x37519621 // NU5 Branch ID (backwards compatible with NU4)
-      4: 0xc2d6d0b4
+      4: 0xc2d6d0b4,
     },
     coin: coins.ZEC,
-    isZcashCompatible: true
+    isZcashCompatible: true,
   },
   zcashTest: {
     messagePrefix: '\x18ZCash Signed Message:\n',
@@ -323,11 +334,11 @@ const networks: Record<NetworkName, Network> &
       // 4: 0x2bb40e60
       // 4: 0xf5b9230b (Heartwood branch id, see https://zips.z.cash/zip-0250)
       // 4: 0xe9ff75a6, // (Canopy branch id, see https://zips.z.cash/zip-0251)
-      4: 0x37519621 // NU5 Branch ID (backwards compatible with NU4)
+      4: 0x37519621, // NU5 Branch ID (backwards compatible with NU4)
     },
     coin: coins.ZEC,
-    isZcashCompatible: true
+    isZcashCompatible: true,
   },
-};
+}
 
-export = networks;
+
