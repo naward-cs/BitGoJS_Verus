@@ -10,7 +10,7 @@ var p2pkh = require('../pubkeyhash/')
 var p2wpkho = require('../witnesspubkeyhash/output')
 var p2wsho = require('../witnessscripthash/output')
 
-function check (script, allowIncomplete) {
+function check(script, allowIncomplete) {
   var chunks = bscript.decompile(script)
   if (chunks.length < 1) return false
 
@@ -28,46 +28,56 @@ function check (script, allowIncomplete) {
 
   // is witness?
   if (chunks.length === 1) {
-    return p2wsho.check(redeemScriptChunks) ||
-      p2wpkho.check(redeemScriptChunks)
+    return p2wsho.check(redeemScriptChunks) || p2wpkho.check(redeemScriptChunks)
   }
 
   // match types
-  if (p2pkh.input.check(scriptSigChunks) &&
-    p2pkh.output.check(redeemScriptChunks)) return true
+  if (
+    p2pkh.input.check(scriptSigChunks) &&
+    p2pkh.output.check(redeemScriptChunks)
+  )
+    return true
 
-  if (p2ms.input.check(scriptSigChunks, allowIncomplete) &&
-    p2ms.output.check(redeemScriptChunks)) return true
+  if (
+    p2ms.input.check(scriptSigChunks, allowIncomplete) &&
+    p2ms.output.check(redeemScriptChunks)
+  )
+    return true
 
-  if (p2pk.input.check(scriptSigChunks) &&
-    p2pk.output.check(redeemScriptChunks)) return true
+  if (
+    p2pk.input.check(scriptSigChunks) &&
+    p2pk.output.check(redeemScriptChunks)
+  )
+    return true
 
   return false
 }
-check.toJSON = function () { return 'scriptHash input' }
+check.toJSON = function () {
+  return 'scriptHash input'
+}
 
-function encodeStack (redeemScriptStack, redeemScript) {
+function encodeStack(redeemScriptStack, redeemScript) {
   var serializedScriptPubKey = bscript.compile(redeemScript)
 
   return [].concat(redeemScriptStack, serializedScriptPubKey)
 }
 
-function encode (redeemScriptSig, redeemScript) {
+function encode(redeemScriptSig, redeemScript) {
   var redeemScriptStack = bscript.decompile(redeemScriptSig)
 
   return bscript.compile(encodeStack(redeemScriptStack, redeemScript))
 }
 
-function decodeStack (stack) {
+function decodeStack(stack) {
   typeforce(check, stack)
 
   return {
     redeemScriptStack: stack.slice(0, -1),
-    redeemScript: stack[stack.length - 1]
+    redeemScript: stack[stack.length - 1],
   }
 }
 
-function decode (buffer) {
+function decode(buffer) {
   var stack = bscript.decompile(buffer)
   var result = decodeStack(stack)
   result.redeemScriptSig = bscript.compile(result.redeemScriptStack)
@@ -80,5 +90,5 @@ module.exports = {
   decode: decode,
   decodeStack: decodeStack,
   encode: encode,
-  encodeStack: encodeStack
+  encodeStack: encodeStack,
 }

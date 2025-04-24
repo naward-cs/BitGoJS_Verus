@@ -10,7 +10,7 @@ var coins = require('./networks/coins')
 
 var Transaction = require('./transaction')
 
-function Block (network) {
+function Block(network) {
   typeforce(types.maybe(types.Network), network)
   if (coins.isZcash(network)) {
     /* istanbul ignore next */
@@ -37,22 +37,31 @@ Block.ZCASH_HEADER_BYTE_SIZE = 140
 Block.prototype.byteLength = function (headersOnly) {
   if (coins.isZcashCompatible(this.network)) {
     var solutionSizeNum = this.solutionSize || 0
-    var headerSizeNum = Block.ZCASH_HEADER_BYTE_SIZE + varuint.encodingLength(solutionSizeNum) + solutionSizeNum
+    var headerSizeNum =
+      Block.ZCASH_HEADER_BYTE_SIZE +
+      varuint.encodingLength(solutionSizeNum) +
+      solutionSizeNum
     if (headersOnly) {
       return headerSizeNum
     }
-    return headerSizeNum +
-      varuint.encodingLength(this.transactions.length) + this.transactions.reduce(function (a, x) {
+    return (
+      headerSizeNum +
+      varuint.encodingLength(this.transactions.length) +
+      this.transactions.reduce(function (a, x) {
         return a + x.byteLength()
       }, 0)
+    )
   }
 
   if (headersOnly || !this.transactions) return Block.HEADER_BYTE_SIZE
 
-  return Block.HEADER_BYTE_SIZE +
-    varuint.encodingLength(this.transactions.length) + this.transactions.reduce(function (a, x) {
+  return (
+    Block.HEADER_BYTE_SIZE +
+    varuint.encodingLength(this.transactions.length) +
+    this.transactions.reduce(function (a, x) {
       return a + x.byteLength()
     }, 0)
+  )
 }
 
 Block.fromBuffer = function (buffer, network) {
@@ -63,7 +72,8 @@ Block.fromBuffer = function (buffer, network) {
   var block = new Block(network)
 
   let headerLength = block.byteLength(true)
-  if (buffer.length < headerLength) throw new Error('Buffer too small (< ' + headerLength + ' bytes)')
+  if (buffer.length < headerLength)
+    throw new Error('Buffer too small (< ' + headerLength + ' bytes)')
 
   block.version = bufferReader.readInt32()
   block.prevHash = bufferReader.readSlice(32)
@@ -84,8 +94,12 @@ Block.fromBuffer = function (buffer, network) {
 
   if (bufferReader.buffer.length === headerLength) return block
 
-  function readTransaction () {
-    var tx = Transaction.fromBuffer(buffer.slice(bufferReader.offset), network, true)
+  function readTransaction() {
+    var tx = Transaction.fromBuffer(
+      buffer.slice(bufferReader.offset),
+      network,
+      true,
+    )
     bufferReader.offset += tx.byteLength()
     return tx
   }
@@ -147,7 +161,11 @@ Block.prototype.toBuffer = function (headersOnly) {
   if (headersOnly || !this.transactions) return buffer
 
   // TODO: use writeVarInt
-  varuint.encode(this.transactions.length, bufferWriter.buffer, bufferWriter.offset)
+  varuint.encode(
+    this.transactions.length,
+    bufferWriter.buffer,
+    bufferWriter.offset,
+  )
   bufferWriter.offset += varuint.encode.bytes
 
   // TODO: use writeVarInt
@@ -184,8 +202,9 @@ Block.calculateTarget = function (bits) {
 }
 
 Block.calculateMerkleRoot = function (transactions) {
-  typeforce([{ getHash: types.Function }], transactions)
-  if (transactions.length === 0) throw TypeError('Cannot compute merkle root for zero transactions')
+  typeforce([{getHash: types.Function}], transactions)
+  if (transactions.length === 0)
+    throw TypeError('Cannot compute merkle root for zero transactions')
 
   var hashes = transactions.map(function (transaction) {
     return transaction.getHash()

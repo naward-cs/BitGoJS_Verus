@@ -7,13 +7,13 @@ var typeforce = require('typeforce')
 describe('types', function () {
   describe('BigInt/ECPoint', function () {
     it('return true for duck types', function () {
-      assert(types.BigInt(new function BigInteger () {}()))
-      assert(types.ECPoint(new function Point () {}()))
+      assert(types.BigInt(new (function BigInteger() {})()))
+      assert(types.ECPoint(new (function Point() {})()))
     })
 
     it('return false for bad types', function () {
-      assert(!types.BigInt(new function NotABigInteger () {}()))
-      assert(!types.ECPoint(new function NotAPoint () {}()))
+      assert(!types.BigInt(new (function NotABigInteger() {})()))
+      assert(!types.ECPoint(new (function NotAPoint() {})()))
     })
   })
 
@@ -48,13 +48,13 @@ describe('types', function () {
   })
 
   describe('Satoshi', function () {
-    [
-      { value: -1, result: false },
-      { value: 0, result: true },
-      { value: 1, result: true },
-      { value: 20999999 * 1e8, result: true },
-      { value: 21000000 * 1e8, result: true },
-      { value: 21000001 * 1e8, result: false }
+    ;[
+      {value: -1, result: false},
+      {value: 0, result: true},
+      {value: 1, result: true},
+      {value: 20999999 * 1e8, result: true},
+      {value: 21000000 * 1e8, result: true},
+      {value: 21000001 * 1e8, result: false},
     ].forEach(function (f) {
       it('returns ' + f.result + ' for valid for ' + f.value, function () {
         assert.strictEqual(types.Satoshi(f.value), f.result)

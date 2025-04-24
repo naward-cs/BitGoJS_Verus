@@ -13,31 +13,41 @@ However the generated fixtures have the same format as the RPC responses so we w
 
 */
 
-import * as fs from 'fs-extra';
-import * as assert from 'assert';
-import { parseTransactionRoundTrip } from '../transaction_util';
-import networks = require('../../src/networks');
-import { RpcTransaction } from './generate/RpcTypes';
-import { normalizeParsedTransaction, normalizeRpcTransaction } from './compare';
+import * as assert from 'assert'
+
+import * as fs from 'fs-extra'
+
+import {parseTransactionRoundTrip} from '../transaction_util'
+import {normalizeParsedTransaction, normalizeRpcTransaction} from './compare'
+import {RpcTransaction} from './generate/RpcTypes'
+
+import networks = require('../../src/networks')
 
 export async function readDashEvoTransactions(): Promise<RpcTransaction[]> {
-  const rootDir = `test/integration_local_rpc/fixtures/dashTestExtra/`;
-  const files = await fs.readdir(rootDir);
+  const rootDir = `test/integration_local_rpc/fixtures/dashTestExtra/`
+  const files = await fs.readdir(rootDir)
   return Promise.all(
-    files.sort().map(async (filename) => JSON.parse(await fs.readFile(`${rootDir}/${filename}`, 'utf8')))
-  );
+    files
+      .sort()
+      .map(async filename =>
+        JSON.parse(await fs.readFile(`${rootDir}/${filename}`, 'utf8')),
+      ),
+  )
 }
 
 describe('Dash', function () {
-  const network = networks.dash;
+  const network = networks.dash
   it(`parses Evolution (EVO) special transactions`, async function () {
-    const txs = await readDashEvoTransactions();
-    assert.strictEqual(txs.length, 29);
+    const txs = await readDashEvoTransactions()
+    assert.strictEqual(txs.length, 29)
 
-    txs.forEach((transaction) => {
-      const buf = Buffer.from(transaction.hex, 'hex');
-      const tx = parseTransactionRoundTrip(buf, network);
-      assert.deepStrictEqual(normalizeParsedTransaction(tx, network), normalizeRpcTransaction(transaction, network));
-    });
-  });
-});
+    txs.forEach(transaction => {
+      const buf = Buffer.from(transaction.hex, 'hex')
+      const tx = parseTransactionRoundTrip(buf, network)
+      assert.deepStrictEqual(
+        normalizeParsedTransaction(tx, network),
+        normalizeRpcTransaction(transaction, network),
+      )
+    })
+  })
+})

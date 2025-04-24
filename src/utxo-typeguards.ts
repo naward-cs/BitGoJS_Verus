@@ -2,16 +2,18 @@ import type {Network} from './types'
 
 import {bigi as BigInteger} from 'bigi'
 import {Point} from 'ecurve'
+
 import {
   isBuffer,
   isString,
+  isUInt8,
   isUInt16,
   isUInt32,
   isUInt53,
-  isUInt8,
   oneOf,
 } from './lib/type-guard'
 
+//TODO: FIXME
 import ECSignature = require('./ecsignature')
 
 //Typeguard already exists in numbers.ts
@@ -57,7 +59,7 @@ export function isBigiInt(value: unknown): value is BigInteger {
   return value instanceof BigInteger
 }
 // const ECPoint = typeforce.quacksLike('Point')
-export function isECPoint(value:unknown):value is Point{
+export function isECPoint(value: unknown): value is Point {
   return value instanceof Point
 }
 //Todo
@@ -67,8 +69,6 @@ export function isECPoint(value:unknown):value is Point{
 export function isECSignature(value: unknown): value is ECSignature {
   return value instanceof ECSignature
 }
-
-
 
 // export function isDefinedHashType(hashType: number):hashType is number {
 //   const hashTypeMod = hashType & ~0xc0

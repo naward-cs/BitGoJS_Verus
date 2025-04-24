@@ -1,28 +1,30 @@
-;
 /**
  * @prettier
  */
-import * as childProcess from 'child_process';
+import * as childProcess from 'child_process'
 
+import * as fs from 'fs-extra'
 
-
-import * as fs from 'fs-extra';
-
-
-
-import { getNetworkList, getNetworkName, isMainnet } from '../../src/coins';
-import { Network } from '../../src/types';
-import { getArchiveRoot, getArchiveUrl, getFixtureInfo, sigHashTestFile, txValidTestFile } from './fixtures';
-
-
-
-
+import {getNetworkList, getNetworkName, isMainnet} from '../../src/coins'
+import {Network} from '../../src/types'
+import {
+  getArchiveRoot,
+  getArchiveUrl,
+  getFixtureInfo,
+  sigHashTestFile,
+  txValidTestFile,
+} from './fixtures'
 
 function downloadAndUnpackTestFixtures(network: Network) {
-  const fixtureInfo = getFixtureInfo(network);
-  const archivePath = `/tmp/${getNetworkName(network)}.tar.gz`;
+  const fixtureInfo = getFixtureInfo(network)
+  const archivePath = `/tmp/${getNetworkName(network)}.tar.gz`
   if (!fs.existsSync(archivePath)) {
-    childProcess.execFileSync('wget', [getArchiveUrl(fixtureInfo), '--quiet', `-O${archivePath}`, '--no-clobber']);
+    childProcess.execFileSync('wget', [
+      getArchiveUrl(fixtureInfo),
+      '--quiet',
+      `-O${archivePath}`,
+      '--no-clobber',
+    ])
   }
 
   childProcess.execFileSync('tar', [
@@ -31,19 +33,19 @@ function downloadAndUnpackTestFixtures(network: Network) {
     `--directory=test/fixtures_thirdparty/nodes/`,
     `${getArchiveRoot(fixtureInfo)}/src/test/data/${sigHashTestFile}`,
     `${getArchiveRoot(fixtureInfo)}/src/test/data/${txValidTestFile}`,
-  ]);
+  ])
 }
 
 async function main() {
   for (const network of getNetworkList().filter(isMainnet)) {
-    downloadAndUnpackTestFixtures(network);
-    console.log(`${getNetworkName(network)} done`);
+    downloadAndUnpackTestFixtures(network)
+    console.log(`${getNetworkName(network)} done`)
   }
 }
 
 if (require.main === module) {
-  main().catch((e) => {
-    console.error(e);
-    process.exit(1);
-  });
+  main().catch(e => {
+    console.error(e)
+    process.exit(1)
+  })
 }

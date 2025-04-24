@@ -68,12 +68,15 @@ var sign = function (hash, d) {
  * @return {Boolean}
  */
 var verify = function (hash, sig, pubkey) {
-  typeforce(types.tuple(
-    types.Hash256bit,
-    types.ECSignature,
-    // both compressed and uncompressed public keys are fine
-    types.oneOf(types.BufferN(33), types.BufferN(65))),
-    arguments)
+  typeforce(
+    types.tuple(
+      types.Hash256bit,
+      types.ECSignature,
+      // both compressed and uncompressed public keys are fine
+      types.oneOf(types.BufferN(33), types.BufferN(65)),
+    ),
+    arguments,
+  )
 
   if (!available) {
     return undefined
@@ -88,5 +91,5 @@ module.exports = {
   available: available,
   publicKeyCreate: publicKeyCreate,
   sign: sign,
-  verify: verify
+  verify: verify,
 }

@@ -2,10 +2,7 @@
 
 const assert = require('assert')
 
-const {
-  networks,
-  Transaction
-} = require('../../../src')
+const {networks, Transaction} = require('../../../src')
 
 var fixtures = require('../../fixtures/forks/dash/transaction')
 
@@ -45,11 +42,22 @@ describe('Transaction (dash)', function () {
   })
 
   describe('getPrevoutHash', function () {
-    fixtures.valid.filter(f => !!f.proRegTx).forEach(function (testData) {
-      it('produces the correct inputsHash on ' + testData.description, function () {
-        const tx = Transaction.fromHex(testData.hex, networks.dashTest)
-        assert.equal(tx.getPrevoutHash(Transaction.SIGHASH_ALL).reverse().toString('hex'), testData.proRegTx.inputsHash)
+    fixtures.valid
+      .filter(f => !!f.proRegTx)
+      .forEach(function (testData) {
+        it(
+          'produces the correct inputsHash on ' + testData.description,
+          function () {
+            const tx = Transaction.fromHex(testData.hex, networks.dashTest)
+            assert.equal(
+              tx
+                .getPrevoutHash(Transaction.SIGHASH_ALL)
+                .reverse()
+                .toString('hex'),
+              testData.proRegTx.inputsHash,
+            )
+          },
+        )
       })
-    })
   })
 })

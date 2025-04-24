@@ -1,10 +1,10 @@
-const { networks, coins } = require('../..')
+const {networks, coins} = require('../..')
 
 class ErrorInvalidFixtures extends Error {
-  constructor (network, message) {
+  constructor(network, message) {
     super(
       `invalid fixtures for ${coins.getNetworkName(network)}` +
-      (message ? `: ${message}` : '')
+        (message ? `: ${message}` : ''),
     )
   }
 }
@@ -14,7 +14,7 @@ class ErrorInvalidFixtures extends Error {
  * @param {Network} fileName
  * @returns {Object} fixtures
  */
-function getFixturesForNetwork (network, fileName) {
+function getFixturesForNetwork(network, fileName) {
   if (coins.isTestnet(network)) {
     throw new Error(`mainnet and testnet fixtures must be in same directory`)
   }
@@ -30,12 +30,12 @@ function getFixturesForNetwork (network, fileName) {
  * Thrown if fixtures cannot be merged
  */
 class ErrorMergeFixtures extends ErrorInvalidFixtures {
-  constructor (network, baseValue, value, path) {
+  constructor(network, baseValue, value, path) {
     super(
       network,
       `error merging fixtures at path ${path.join('.')}: ` +
-      `fork fixture is ${typeof value}, ` +
-      `base fixture is ${typeof baseValue}`
+        `fork fixture is ${typeof value}, ` +
+        `base fixture is ${typeof baseValue}`,
     )
   }
 }
@@ -54,7 +54,7 @@ class ErrorMergeFixtures extends ErrorInvalidFixtures {
  * @param {string[]?} path - used in error message
  * @returns {Object} merged fixtures
  */
-function mergeFixtures (network, baseFixtures, forkFixtures, path = []) {
+function mergeFixtures(network, baseFixtures, forkFixtures, path = []) {
   const merged = {}
   for (const key in forkFixtures) {
     const keyPath = [...path, key]
@@ -91,12 +91,12 @@ function mergeFixtures (network, baseFixtures, forkFixtures, path = []) {
  *                                 Will be called with bitcoin fixtures on first call.
  * @returns {Object}
  */
-function combineFixtureFiles (forkNetworks, fileName, combineFunc) {
-  return forkNetworks
-    .reduce(
-      (acc, network) => combineFunc(acc, network, getFixturesForNetwork(network, fileName)),
-      getFixturesForNetwork(networks.bitcoin, fileName)
-    )
+function combineFixtureFiles(forkNetworks, fileName, combineFunc) {
+  return forkNetworks.reduce(
+    (acc, network) =>
+      combineFunc(acc, network, getFixturesForNetwork(network, fileName)),
+    getFixturesForNetwork(networks.bitcoin, fileName),
+  )
 }
 
 const forkMainnetNames = coins
@@ -110,7 +110,7 @@ const forkMainnetNames = coins
  * @returns {Object} combined fixtures for bitcoin and forks specified in _networks_.
  */
 // FIXME(BG-16846): add fixtures for all coins, remove `networks` argument
-function combine (fileName, forkNames = forkMainnetNames) {
+function combine(fileName, forkNames = forkMainnetNames) {
   if (!Array.isArray(forkNames)) {
     throw new TypeError(`invalid argument: forkNames`)
   }
@@ -121,9 +121,11 @@ function combine (fileName, forkNames = forkMainnetNames) {
   }
 
   return combineFixtureFiles(
-    forkNetworks, fileName, (baseFixtures, network, forkFixtures) => {
+    forkNetworks,
+    fileName,
+    (baseFixtures, network, forkFixtures) => {
       return mergeFixtures(network, baseFixtures, forkFixtures)
-    }
+    },
   )
 }
 
@@ -131,5 +133,5 @@ module.exports = {
   ErrorInvalidFixtures,
   ErrorMergeFixtures,
   mergeFixtures,
-  combine
+  combine,
 }

@@ -21,15 +21,18 @@ describe('address', function () {
 
     fixtures.invalid.fromBase58Check.forEach(function (f) {
       it('throws on ' + f.exception, function () {
-        assert.throws(function () {
-          baddress.fromBase58Check(f.address)
-        }, new RegExp(f.address + ' ' + f.exception))
+        assert.throws(
+          function () {
+            baddress.fromBase58Check(f.address)
+          },
+          new RegExp(f.address + ' ' + f.exception),
+        )
       })
     })
   })
 
   describe('fromBech32', function () {
-    fixtures.standard.forEach((f) => {
+    fixtures.standard.forEach(f => {
       if (!f.bech32) return
 
       it('decodes ' + f.bech32, function () {
@@ -52,22 +55,28 @@ describe('address', function () {
 
   describe('fromOutputScript', function () {
     fixtures.standard.forEach(function (f) {
-      it('encodes ' + f.script.slice(0, 30) + '... (' + f.network + ')', function () {
-        var script = bscript.fromASM(f.script)
-        var address = baddress.fromOutputScript(script, networks[f.network])
+      it(
+        'encodes ' + f.script.slice(0, 30) + '... (' + f.network + ')',
+        function () {
+          var script = bscript.fromASM(f.script)
+          var address = baddress.fromOutputScript(script, networks[f.network])
 
-        assert.strictEqual(address, f.base58check || f.bech32.toLowerCase())
-      })
+          assert.strictEqual(address, f.base58check || f.bech32.toLowerCase())
+        },
+      )
     })
 
     fixtures.invalid.fromOutputScript.forEach(function (f) {
-      it('throws when ' + f.script.slice(0, 30) + '... ' + f.exception, function () {
-        var script = bscript.fromASM(f.script)
+      it(
+        'throws when ' + f.script.slice(0, 30) + '... ' + f.exception,
+        function () {
+          var script = bscript.fromASM(f.script)
 
-        assert.throws(function () {
-          baddress.fromOutputScript(script)
-        }, new RegExp(f.exception))
-      })
+          assert.throws(function () {
+            baddress.fromOutputScript(script)
+          }, new RegExp(f.exception))
+        },
+      )
     })
   })
 
@@ -76,7 +85,10 @@ describe('address', function () {
       if (!f.base58check) return
 
       it('encodes ' + f.hash + ' (' + f.network + ')', function () {
-        var address = baddress.toBase58Check(Buffer.from(f.hash, 'hex'), f.version)
+        var address = baddress.toBase58Check(
+          Buffer.from(f.hash, 'hex'),
+          f.version,
+        )
 
         assert.strictEqual(address, f.base58check)
       })
@@ -89,7 +101,10 @@ describe('address', function () {
       var data = Buffer.from(f.data, 'hex')
 
       it('encode ' + f.address, function () {
-        assert.deepEqual(baddress.toBech32(data, f.version, f.prefix), f.address)
+        assert.deepEqual(
+          baddress.toBech32(data, f.version, f.prefix),
+          f.address,
+        )
       })
     })
 
@@ -106,18 +121,27 @@ describe('address', function () {
 
   describe('toOutputScript', function () {
     fixtures.standard.forEach(function (f) {
-      it('decodes ' + f.script.slice(0, 30) + '... (' + f.network + ')', function () {
-        var script = baddress.toOutputScript(f.base58check || f.bech32, networks[f.network])
+      it(
+        'decodes ' + f.script.slice(0, 30) + '... (' + f.network + ')',
+        function () {
+          var script = baddress.toOutputScript(
+            f.base58check || f.bech32,
+            networks[f.network],
+          )
 
-        assert.strictEqual(bscript.toASM(script), f.script)
-      })
+          assert.strictEqual(bscript.toASM(script), f.script)
+        },
+      )
     })
 
     fixtures.invalid.toOutputScript.forEach(function (f) {
       it('throws when ' + f.exception, function () {
-        assert.throws(function () {
-          baddress.toOutputScript(f.address, f.network)
-        }, new RegExp(f.address + ' ' + f.exception))
+        assert.throws(
+          function () {
+            baddress.toOutputScript(f.address, f.network)
+          },
+          new RegExp(f.address + ' ' + f.exception),
+        )
       })
     })
   })

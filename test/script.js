@@ -79,11 +79,18 @@ describe('script', function () {
         var script = bscript.fromASM(f.asm)
 
         var stack = bscript.toStack(script)
-        assert.deepEqual(stack.map(function (x) {
-          return x.toString('hex')
-        }), f.stack)
+        assert.deepEqual(
+          stack.map(function (x) {
+            return x.toString('hex')
+          }),
+          f.stack,
+        )
 
-        assert.equal(bscript.toASM(bscript.compile(stack)), f.asm, 'should rebuild same script from stack')
+        assert.equal(
+          bscript.toASM(bscript.compile(stack)),
+          f.asm,
+          'should rebuild same script from stack',
+        )
       })
     })
   })
@@ -113,9 +120,14 @@ describe('script', function () {
         assert.strictEqual(bscript.toASM(chunks), f.asm)
 
         if (f.nonstandard) {
-          var chunksNS = bscript.decompile(Buffer.from(f.nonstandard.scriptSigHex, 'hex'))
+          var chunksNS = bscript.decompile(
+            Buffer.from(f.nonstandard.scriptSigHex, 'hex'),
+          )
 
-          assert.strictEqual(bscript.compile(chunksNS).toString('hex'), f.script)
+          assert.strictEqual(
+            bscript.compile(chunksNS).toString('hex'),
+            f.script,
+          )
 
           // toASM converts verbatim, only `compile` transforms the script to a minimalpush compliant script
           assert.strictEqual(bscript.toASM(chunksNS), f.nonstandard.scriptSig)
@@ -124,11 +136,14 @@ describe('script', function () {
     })
 
     fixtures.invalid.decompile.forEach(function (f) {
-      it('decompiles ' + f.script + ' to [] because of "' + f.description + '"', function () {
-        var chunks = bscript.decompile(Buffer.from(f.script, 'hex'))
+      it(
+        'decompiles ' + f.script + ' to [] because of "' + f.description + '"',
+        function () {
+          var chunks = bscript.decompile(Buffer.from(f.script, 'hex'))
 
-        assert.strictEqual(chunks.length, 0)
-      })
+          assert.strictEqual(chunks.length, 0)
+        },
+      )
     })
   })
 
@@ -141,12 +156,15 @@ describe('script', function () {
       })
     })
 
-    function testEncodingForSize (i) {
+    function testEncodingForSize(i) {
       it('compliant for data PUSH of length ' + i, function () {
         var buffer = Buffer.alloc(i)
         var script = bscript.compile([buffer])
 
-        assert(minimalData(script), 'Failed for ' + i + ' length script: ' + script.toString('hex'))
+        assert(
+          minimalData(script),
+          'Failed for ' + i + ' length script: ' + script.toString('hex'),
+        )
       })
     }
 

@@ -19,10 +19,10 @@ var types = {
   P2WPKH: 'witnesspubkeyhash',
   P2WSH: 'witnessscripthash',
   WITNESS_COMMITMENT: 'witnesscommitment',
-  SMART_TRANSACTION: 'smarttransaction'
+  SMART_TRANSACTION: 'smarttransaction',
 }
 
-function classifyOutput (script) {
+function classifyOutput(script) {
   if (witnessPubKeyHash.output.check(script)) return types.P2WPKH
   if (witnessScriptHash.output.check(script)) return types.P2WSH
   if (pubKeyHash.output.check(script)) return types.P2PKH
@@ -39,7 +39,7 @@ function classifyOutput (script) {
   return types.NONSTANDARD
 }
 
-function classifyInput (script, allowIncomplete) {
+function classifyInput(script, allowIncomplete) {
   // XXX: optimization, below functions .decompile before use
   var chunks = decompile(script)
 
@@ -52,7 +52,7 @@ function classifyInput (script, allowIncomplete) {
   return types.NONSTANDARD
 }
 
-function classifyWitness (script, allowIncomplete) {
+function classifyWitness(script, allowIncomplete) {
   // XXX: optimization, below functions .decompile before use
   var chunks = decompile(script)
 
@@ -75,5 +75,5 @@ module.exports = {
   witnessPubKeyHash: witnessPubKeyHash,
   witnessScriptHash: witnessScriptHash,
   witnessCommitment: witnessCommitment,
-  types: types
+  types: types,
 }

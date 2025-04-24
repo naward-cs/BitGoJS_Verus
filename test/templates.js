@@ -8,8 +8,12 @@ var ops = require('bitcoin-ops')
 
 var fixtures = require('./fixtures/templates.json')
 
-function fromHex (x) { return Buffer.from(x, 'hex') }
-function toHex (x) { return x.toString('hex') }
+function fromHex(x) {
+  return Buffer.from(x, 'hex')
+}
+function toHex(x) {
+  return x.toString('hex')
+}
 
 describe('script-templates', function () {
   describe('classifyInput', function () {
@@ -28,12 +32,15 @@ describe('script-templates', function () {
       if (!f.input) return
       if (!f.typeIncomplete) return
 
-      it('classifies incomplete ' + f.input + ' as ' + f.typeIncomplete, function () {
-        var input = bscript.fromASM(f.input)
-        var type = btemplates.classifyInput(input, true)
+      it(
+        'classifies incomplete ' + f.input + ' as ' + f.typeIncomplete,
+        function () {
+          var input = bscript.fromASM(f.input)
+          var type = btemplates.classifyInput(input, true)
 
-        assert.strictEqual(type, f.typeIncomplete)
-      })
+          assert.strictEqual(type, f.typeIncomplete)
+        },
+      )
     })
   })
 
@@ -49,7 +56,6 @@ describe('script-templates', function () {
       })
     })
   })
-
   ;[
     'pubKey',
     'pubKeyHash',
@@ -59,7 +65,7 @@ describe('script-templates', function () {
     'smartTransaction',
     'multisig',
     'nullData',
-    'witnessCommitment'
+    'witnessCommitment',
   ].forEach(function (name) {
     var inputType = btemplates[name].input
     var outputType = btemplates[name].output
@@ -81,28 +87,38 @@ describe('script-templates', function () {
             var expectedIncomplete = name.toLowerCase() === f.typeIncomplete
 
             it('returns ' + expected + ' for ' + f.input, function () {
-              assert.strictEqual(inputType.check(input, true), expectedIncomplete)
+              assert.strictEqual(
+                inputType.check(input, true),
+                expectedIncomplete,
+              )
             })
           }
         }
       })
 
-      if (!(fixtures.invalid[name])) return
+      if (!fixtures.invalid[name]) return
 
       fixtures.invalid[name].inputs.forEach(function (f) {
         if (!f.input && !f.inputHex) return
 
-        it('returns false for ' + f.description + ' (' + (f.input || f.inputHex) + ')', function () {
-          var input
+        it(
+          'returns false for ' +
+            f.description +
+            ' (' +
+            (f.input || f.inputHex) +
+            ')',
+          function () {
+            var input
 
-          if (f.input) {
-            input = bscript.fromASM(f.input)
-          } else {
-            input = Buffer.from(f.inputHex, 'hex')
-          }
+            if (f.input) {
+              input = bscript.fromASM(f.input)
+            } else {
+              input = Buffer.from(f.inputHex, 'hex')
+            }
 
-          assert.strictEqual(inputType.check(input), false)
-        })
+            assert.strictEqual(inputType.check(input), false)
+          },
+        )
       })
     })
 
@@ -114,29 +130,44 @@ describe('script-templates', function () {
           it('returns ' + expected + ' for ' + f.output, function () {
             var output = bscript.fromASM(f.output)
 
-            if (name.toLowerCase() === 'nulldata' && f.type === btemplates.types.WITNESS_COMMITMENT) return
-            if (name.toLowerCase() === 'witnesscommitment' && f.type === btemplates.types.NULLDATA) return
+            if (
+              name.toLowerCase() === 'nulldata' &&
+              f.type === btemplates.types.WITNESS_COMMITMENT
+            )
+              return
+            if (
+              name.toLowerCase() === 'witnesscommitment' &&
+              f.type === btemplates.types.NULLDATA
+            )
+              return
             assert.strictEqual(outputType.check(output), expected)
           })
         }
       })
 
-      if (!(fixtures.invalid[name])) return
+      if (!fixtures.invalid[name]) return
 
       fixtures.invalid[name].outputs.forEach(function (f) {
         if (!f.output && !f.outputHex) return
 
-        it('returns false for ' + f.description + ' (' + (f.output || f.outputHex) + ')', function () {
-          var output
+        it(
+          'returns false for ' +
+            f.description +
+            ' (' +
+            (f.output || f.outputHex) +
+            ')',
+          function () {
+            var output
 
-          if (f.output) {
-            output = bscript.fromASM(f.output)
-          } else {
-            output = Buffer.from(f.outputHex, 'hex')
-          }
+            if (f.output) {
+              output = bscript.fromASM(f.output)
+            } else {
+              output = Buffer.from(f.outputHex, 'hex')
+            }
 
-          assert.strictEqual(outputType.check(output), false)
-        })
+            assert.strictEqual(outputType.check(output), false)
+          },
+        )
       })
     })
   })
@@ -190,7 +221,7 @@ describe('script-templates', function () {
       it('decodes to original arguments', function () {
         assert.deepEqual(btemplates.pubKeyHash.input.decode(input), {
           signature: signature,
-          pubKey: pubKey
+          pubKey: pubKey,
         })
       })
     })
@@ -209,7 +240,10 @@ describe('script-templates', function () {
       })
 
       it('decodes to ' + pubKeyHash.toString('hex'), function () {
-        assert.deepEqual(btemplates.pubKeyHash.output.decode(output), pubKeyHash)
+        assert.deepEqual(
+          btemplates.pubKeyHash.output.decode(output),
+          pubKeyHash,
+        )
       })
     })
 
@@ -240,9 +274,18 @@ describe('script-templates', function () {
         assert.strictEqual(bscript.toASM(input), f.input)
       })
 
-      it('decodes to ' + signatures.map(function (x) { return x === ops.OP_0 ? 'OP_0' : x.toString('hex') }), function () {
-        assert.deepEqual(btemplates.multisig.input.decode(input, allowIncomplete), signatures)
-      })
+      it(
+        'decodes to ' +
+          signatures.map(function (x) {
+            return x === ops.OP_0 ? 'OP_0' : x.toString('hex')
+          }),
+        function () {
+          assert.deepEqual(
+            btemplates.multisig.input.decode(input, allowIncomplete),
+            signatures,
+          )
+        },
+      )
     })
 
     fixtures.invalid.multisig.inputs.forEach(function (f) {
@@ -265,7 +308,9 @@ describe('script-templates', function () {
     fixtures.valid.forEach(function (f) {
       if (f.type !== 'multisig') return
 
-      var pubKeys = f.pubKeys.map(function (p) { return Buffer.from(p, 'hex') })
+      var pubKeys = f.pubKeys.map(function (p) {
+        return Buffer.from(p, 'hex')
+      })
       var m = pubKeys.length
 
       var output = btemplates.multisig.output.encode(m, pubKeys)
@@ -277,7 +322,7 @@ describe('script-templates', function () {
       it('decodes to original arguments', function () {
         assert.deepEqual(btemplates.multisig.output.decode(output), {
           m: m,
-          pubKeys: pubKeys
+          pubKeys: pubKeys,
         })
       })
     })
@@ -302,7 +347,10 @@ describe('script-templates', function () {
 
       var redeemScriptSig = bscript.fromASM(f.redeemScriptSig)
       var redeemScript = bscript.fromASM(f.redeemScript)
-      var input = btemplates.scriptHash.input.encode(redeemScriptSig, redeemScript)
+      var input = btemplates.scriptHash.input.encode(
+        redeemScriptSig,
+        redeemScript,
+      )
 
       it('encodes to ' + f.output, function () {
         if (f.input) {
@@ -315,7 +363,7 @@ describe('script-templates', function () {
       it('decodes to original arguments', function () {
         assert.deepEqual(btemplates.scriptHash.input.decode(input), {
           redeemScriptSig: redeemScriptSig,
-          redeemScript: redeemScript
+          redeemScript: redeemScript,
         })
       })
     })
@@ -335,7 +383,10 @@ describe('script-templates', function () {
       })
 
       it('decodes to ' + scriptHash.toString('hex'), function () {
-        assert.deepEqual(btemplates.scriptHash.output.decode(output), scriptHash)
+        assert.deepEqual(
+          btemplates.scriptHash.output.decode(output),
+          scriptHash,
+        )
       })
     })
 
@@ -360,7 +411,10 @@ describe('script-templates', function () {
       var signature = Buffer.from(f.signature, 'hex')
 
       it('encodes to ' + f.input, function () {
-        var inputStack = btemplates.witnessPubKeyHash.input.encodeStack(signature, pubKey)
+        var inputStack = btemplates.witnessPubKeyHash.input.encodeStack(
+          signature,
+          pubKey,
+        )
 
         assert.deepEqual(inputStack.map(toHex), f.inputStack)
       })
@@ -368,10 +422,13 @@ describe('script-templates', function () {
       it('decodes to original arguments', function () {
         var fInputStack = f.inputStack.map(fromHex)
 
-        assert.deepEqual(btemplates.witnessPubKeyHash.input.decodeStack(fInputStack), {
-          signature: signature,
-          pubKey: pubKey
-        })
+        assert.deepEqual(
+          btemplates.witnessPubKeyHash.input.decodeStack(fInputStack),
+          {
+            signature: signature,
+            pubKey: pubKey,
+          },
+        )
       })
     })
   })
@@ -390,7 +447,10 @@ describe('script-templates', function () {
       })
 
       it('decodes to ' + pubKeyHash.toString('hex'), function () {
-        assert.deepEqual(btemplates.witnessPubKeyHash.output.decode(output), pubKeyHash)
+        assert.deepEqual(
+          btemplates.witnessPubKeyHash.output.decode(output),
+          pubKeyHash,
+        )
       })
     })
 
@@ -415,13 +475,18 @@ describe('script-templates', function () {
       var witnessScript = bscript.fromASM(f.witnessScript || f.redeemScript)
 
       it('encodes to ' + f.input, function () {
-        var inputStack = btemplates.witnessScriptHash.input.encodeStack(witnessData, witnessScript)
+        var inputStack = btemplates.witnessScriptHash.input.encodeStack(
+          witnessData,
+          witnessScript,
+        )
 
         assert.deepEqual(inputStack.map(toHex), f.inputStack)
       })
 
       it('decodes to original arguments', function () {
-        var result = btemplates.witnessScriptHash.input.decodeStack(f.inputStack.map(fromHex))
+        var result = btemplates.witnessScriptHash.input.decodeStack(
+          f.inputStack.map(fromHex),
+        )
 
         assert.deepEqual(result.witnessData.map(toHex), f.witnessData)
         assert.strictEqual(bscript.toASM(result.witnessScript), f.witnessScript)
@@ -443,7 +508,10 @@ describe('script-templates', function () {
       })
 
       it('decodes to ' + scriptHash.toString('hex'), function () {
-        assert.deepEqual(btemplates.witnessScriptHash.output.decode(output), scriptHash)
+        assert.deepEqual(
+          btemplates.witnessScriptHash.output.decode(output),
+          scriptHash,
+        )
       })
     })
 
@@ -472,7 +540,10 @@ describe('script-templates', function () {
       })
 
       it('decodes to ' + commitment.toString('hex'), function () {
-        assert.deepEqual(btemplates.witnessCommitment.output.decode(scriptPubKey), commitment)
+        assert.deepEqual(
+          btemplates.witnessCommitment.output.decode(scriptPubKey),
+          commitment,
+        )
       })
     })
 
@@ -489,7 +560,9 @@ describe('script-templates', function () {
       if (f.scriptPubKeyHex) {
         it('.decode throws on ' + f.description, function () {
           assert.throws(function () {
-            btemplates.witnessCommitment.output.decode(Buffer.from(f.scriptPubKeyHex, 'hex'))
+            btemplates.witnessCommitment.output.decode(
+              Buffer.from(f.scriptPubKeyHex, 'hex'),
+            )
           }, new RegExp(f.exception))
         })
       }

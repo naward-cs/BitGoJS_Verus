@@ -6,7 +6,7 @@ var typeforce = require('typeforce')
 var OPS = require('bitcoin-ops')
 var OP_INT_BASE = OPS.OP_RESERVED // OP_1 - 1
 
-function check (script, allowIncomplete) {
+function check(script, allowIncomplete) {
   var chunks = bscript.decompile(script)
 
   if (chunks.length < 4) return false
@@ -25,40 +25,42 @@ function check (script, allowIncomplete) {
   var keys = chunks.slice(1, -2)
   return keys.every(bscript.isCanonicalPubKey)
 }
-check.toJSON = function () { return 'multi-sig output' }
+check.toJSON = function () {
+  return 'multi-sig output'
+}
 
-function encode (m, pubKeys) {
-  typeforce({
-    m: types.Number,
-    pubKeys: [bscript.isCanonicalPubKey]
-  }, {
-    m: m,
-    pubKeys: pubKeys
-  })
+function encode(m, pubKeys) {
+  typeforce(
+    {
+      m: types.Number,
+      pubKeys: [bscript.isCanonicalPubKey],
+    },
+    {
+      m: m,
+      pubKeys: pubKeys,
+    },
+  )
 
   var n = pubKeys.length
   if (n < m) throw new TypeError('Not enough pubKeys provided')
 
-  return bscript.compile([].concat(
-    OP_INT_BASE + m,
-    pubKeys,
-    OP_INT_BASE + n,
-    OPS.OP_CHECKMULTISIG
-  ))
+  return bscript.compile(
+    [].concat(OP_INT_BASE + m, pubKeys, OP_INT_BASE + n, OPS.OP_CHECKMULTISIG),
+  )
 }
 
-function decode (buffer, allowIncomplete) {
+function decode(buffer, allowIncomplete) {
   var chunks = bscript.decompile(buffer)
   typeforce(check, chunks, allowIncomplete)
 
   return {
     m: chunks[0] - OP_INT_BASE,
-    pubKeys: chunks.slice(1, -2)
+    pubKeys: chunks.slice(1, -2),
   }
 }
 
 module.exports = {
   check: check,
   decode: decode,
-  encode: encode
+  encode: encode,
 }

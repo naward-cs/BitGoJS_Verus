@@ -13,14 +13,11 @@ var fixtures = require('./fixtures/hdnode.json')
 var curve = ecdsa.__curve
 
 var NETWORKS = require('../src/networks')
-var NETWORKS_LIST = [
-  NETWORKS.bitcoin,
-  NETWORKS.testnet
-]
+var NETWORKS_LIST = [NETWORKS.bitcoin, NETWORKS.testnet]
 
 var validAll = []
 fixtures.valid.forEach(function (f) {
-  function addNetwork (n) {
+  function addNetwork(n) {
     n.network = f.network
     return n
   }
@@ -70,32 +67,42 @@ describe('HDNode', function () {
 
   describe('fromSeed*', function () {
     fixtures.valid.forEach(function (f) {
-      it('calculates privKey and chainCode for ' + f.master.fingerprint, function () {
-        var network = NETWORKS[f.network]
-        var hd = HDNode.fromSeedHex(f.master.seed, network)
+      it(
+        'calculates privKey and chainCode for ' + f.master.fingerprint,
+        function () {
+          var network = NETWORKS[f.network]
+          var hd = HDNode.fromSeedHex(f.master.seed, network)
 
-        assert.strictEqual(hd.keyPair.toWIF(), f.master.wif)
-        assert.strictEqual(hd.chainCode.toString('hex'), f.master.chainCode)
-      })
+          assert.strictEqual(hd.keyPair.toWIF(), f.master.wif)
+          assert.strictEqual(hd.chainCode.toString('hex'), f.master.chainCode)
+        },
+      )
     })
 
-    it('throws if IL is not within interval [1, n - 1] | IL === 0', sinon.test(function () {
-      this.mock(BigInteger).expects('fromBuffer')
-        .once().returns(BigInteger.ZERO)
+    it(
+      'throws if IL is not within interval [1, n - 1] | IL === 0',
+      sinon.test(function () {
+        this.mock(BigInteger)
+          .expects('fromBuffer')
+          .once()
+          .returns(BigInteger.ZERO)
 
-      assert.throws(function () {
-        HDNode.fromSeedHex('ffffffffffffffffffffffffffffffff')
-      }, /Private key must be greater than 0/)
-    }))
+        assert.throws(function () {
+          HDNode.fromSeedHex('ffffffffffffffffffffffffffffffff')
+        }, /Private key must be greater than 0/)
+      }),
+    )
 
-    it('throws if IL is not within interval [1, n - 1] | IL === n', sinon.test(function () {
-      this.mock(BigInteger).expects('fromBuffer')
-        .once().returns(curve.n)
+    it(
+      'throws if IL is not within interval [1, n - 1] | IL === n',
+      sinon.test(function () {
+        this.mock(BigInteger).expects('fromBuffer').once().returns(curve.n)
 
-      assert.throws(function () {
-        HDNode.fromSeedHex('ffffffffffffffffffffffffffffffff')
-      }, /Private key must be less than the curve order/)
-    }))
+        assert.throws(function () {
+          HDNode.fromSeedHex('ffffffffffffffffffffffffffffffff')
+        }, /Private key must be less than the curve order/)
+      }),
+    )
 
     it('throws on low entropy seed', function () {
       assert.throws(function () {
@@ -105,7 +112,9 @@ describe('HDNode', function () {
 
     it('throws on too high entropy seed', function () {
       assert.throws(function () {
-        HDNode.fromSeedHex('ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
+        HDNode.fromSeedHex(
+          'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
+        )
       }, /Seed should be at most 512 bits/)
     })
   })
@@ -122,39 +131,63 @@ describe('HDNode', function () {
     })
 
     describe('getAddress', function () {
-      it('wraps keyPair.getAddress', sinon.test(function () {
-        this.mock(keyPair).expects('getAddress')
-          .once().withArgs().returns('foobar')
+      it(
+        'wraps keyPair.getAddress',
+        sinon.test(function () {
+          this.mock(keyPair)
+            .expects('getAddress')
+            .once()
+            .withArgs()
+            .returns('foobar')
 
-        assert.strictEqual(hd.getAddress(), 'foobar')
-      }))
+          assert.strictEqual(hd.getAddress(), 'foobar')
+        }),
+      )
     })
 
     describe('getNetwork', function () {
-      it('wraps keyPair.getNetwork', sinon.test(function () {
-        this.mock(keyPair).expects('getNetwork')
-          .once().withArgs().returns('network')
+      it(
+        'wraps keyPair.getNetwork',
+        sinon.test(function () {
+          this.mock(keyPair)
+            .expects('getNetwork')
+            .once()
+            .withArgs()
+            .returns('network')
 
-        assert.strictEqual(hd.getNetwork(), 'network')
-      }))
+          assert.strictEqual(hd.getNetwork(), 'network')
+        }),
+      )
     })
 
     describe('getPublicKeyBuffer', function () {
-      it('wraps keyPair.getPublicKeyBuffer', sinon.test(function () {
-        this.mock(keyPair).expects('getPublicKeyBuffer')
-          .once().withArgs().returns('pubKeyBuffer')
+      it(
+        'wraps keyPair.getPublicKeyBuffer',
+        sinon.test(function () {
+          this.mock(keyPair)
+            .expects('getPublicKeyBuffer')
+            .once()
+            .withArgs()
+            .returns('pubKeyBuffer')
 
-        assert.strictEqual(hd.getPublicKeyBuffer(), 'pubKeyBuffer')
-      }))
+          assert.strictEqual(hd.getPublicKeyBuffer(), 'pubKeyBuffer')
+        }),
+      )
     })
 
     describe('sign', function () {
-      it('wraps keyPair.sign', sinon.test(function () {
-        this.mock(keyPair).expects('sign')
-          .once().withArgs(hash).returns('signed')
+      it(
+        'wraps keyPair.sign',
+        sinon.test(function () {
+          this.mock(keyPair)
+            .expects('sign')
+            .once()
+            .withArgs(hash)
+            .returns('signed')
 
-        assert.strictEqual(hd.sign(hash), 'signed')
-      }))
+          assert.strictEqual(hd.sign(hash), 'signed')
+        }),
+      )
     })
 
     describe('verify', function () {
@@ -164,28 +197,42 @@ describe('HDNode', function () {
         signature = hd.sign(hash)
       })
 
-      it('wraps keyPair.verify', sinon.test(function () {
-        this.mock(keyPair).expects('verify')
-          .once().withArgs(hash, signature).returns('verified')
+      it(
+        'wraps keyPair.verify',
+        sinon.test(function () {
+          this.mock(keyPair)
+            .expects('verify')
+            .once()
+            .withArgs(hash, signature)
+            .returns('verified')
 
-        assert.strictEqual(hd.verify(hash, signature), 'verified')
-      }))
+          assert.strictEqual(hd.verify(hash, signature), 'verified')
+        }),
+      )
     })
   })
 
   describe('fromBase58 / toBase58', function () {
     validAll.forEach(function (f) {
       it('exports ' + f.base58 + ' (public) correctly', function () {
-        var hd = HDNode.fromBase58(f.base58, f.network ? NETWORKS[f.network] : undefined)
+        var hd = HDNode.fromBase58(
+          f.base58,
+          f.network ? NETWORKS[f.network] : undefined,
+        )
 
         assert.strictEqual(hd.toBase58(), f.base58)
-        assert.throws(function () { hd.keyPair.toWIF() }, /Missing private key/)
+        assert.throws(function () {
+          hd.keyPair.toWIF()
+        }, /Missing private key/)
       })
     })
 
     validAll.forEach(function (f) {
       it('exports ' + f.base58Priv + ' (private) correctly', function () {
-        var hd = HDNode.fromBase58(f.base58Priv, f.network ? NETWORKS[f.network] : undefined)
+        var hd = HDNode.fromBase58(
+          f.base58Priv,
+          f.network ? NETWORKS[f.network] : undefined,
+        )
 
         assert.strictEqual(hd.toBase58(), f.base58Priv)
         assert.strictEqual(hd.keyPair.toWIF(), f.wif)
@@ -230,7 +277,9 @@ describe('HDNode', function () {
         var hdn = hd.neutered()
 
         assert.notEqual(hdn.keyPair, hd.keyPair)
-        assert.throws(function () { hdn.keyPair.toWIF() }, /Missing private key/)
+        assert.throws(function () {
+          hdn.keyPair.toWIF()
+        }, /Missing private key/)
         assert.strictEqual(hdn.toBase58(), f.base58)
         assert.strictEqual(hdn.chainCode, hd.chainCode)
         assert.strictEqual(hdn.depth, f.depth >>> 0)
@@ -245,7 +294,7 @@ describe('HDNode', function () {
   })
 
   describe('derive', function () {
-    function verifyVector (hd, v) {
+    function verifyVector(hd, v) {
       if (hd.isNeutered()) {
         assert.strictEqual(hd.toBase58(), v.base58)
       } else {
@@ -257,7 +306,10 @@ describe('HDNode', function () {
       assert.strictEqual(hd.getIdentifier().toString('hex'), v.identifier)
       assert.strictEqual(hd.getAddress(), v.address)
       assert.strictEqual(hd.keyPair.toWIF(), v.wif)
-      assert.strictEqual(hd.keyPair.getPublicKeyBuffer().toString('hex'), v.pubKey)
+      assert.strictEqual(
+        hd.keyPair.getPublicKeyBuffer().toString('hex'),
+        v.pubKey,
+      )
       assert.strictEqual(hd.chainCode.toString('hex'), v.chainCode)
       assert.strictEqual(hd.depth, v.depth >>> 0)
       assert.strictEqual(hd.index, v.index >>> 0)
@@ -285,7 +337,11 @@ describe('HDNode', function () {
 
         f.children.slice(i + 1).forEach(function (cc) {
           it(cc.path + ' from ' + c.fingerprint + ' by path', function () {
-            var ipath = cc.path.slice(2).split('/').slice(i + 1).join('/')
+            var ipath = cc.path
+              .slice(2)
+              .split('/')
+              .slice(i + 1)
+              .join('/')
             var child = cn.derivePath(ipath)
             verifyVector(child, cc)
 
@@ -377,20 +433,31 @@ describe('HDNode', function () {
     })
 
     it('works when private key has leading zeros', function () {
-      var key = 'xprv9s21ZrQH143K3ckY9DgU79uMTJkQRLdbCCVDh81SnxTgPzLLGax6uHeBULTtaEtcAvKjXfT7ZWtHzKjTpujMkUd9dDb8msDeAfnJxrgAYhr'
+      var key =
+        'xprv9s21ZrQH143K3ckY9DgU79uMTJkQRLdbCCVDh81SnxTgPzLLGax6uHeBULTtaEtcAvKjXfT7ZWtHzKjTpujMkUd9dDb8msDeAfnJxrgAYhr'
       var hdkey = HDNode.fromBase58(key)
-      assert.strictEqual(hdkey.keyPair.d.toBuffer(32).toString('hex'), '00000055378cf5fafb56c711c674143f9b0ee82ab0ba2924f19b64f5ae7cdbfd')
-      var child = hdkey.derivePath('m/44\'/0\'/0\'/0/0\'')
-      assert.strictEqual(child.keyPair.d.toBuffer().toString('hex'), '3348069561d2a0fb925e74bf198762acc47dce7db27372257d2d959a9e6f8aeb')
+      assert.strictEqual(
+        hdkey.keyPair.d.toBuffer(32).toString('hex'),
+        '00000055378cf5fafb56c711c674143f9b0ee82ab0ba2924f19b64f5ae7cdbfd',
+      )
+      var child = hdkey.derivePath("m/44'/0'/0'/0/0'")
+      assert.strictEqual(
+        child.keyPair.d.toBuffer().toString('hex'),
+        '3348069561d2a0fb925e74bf198762acc47dce7db27372257d2d959a9e6f8aeb',
+      )
     })
 
     it('works with cached intermediate nodes', function () {
-      var key = 'xprv9s21ZrQH143K3ckY9DgU79uMTJkQRLdbCCVDh81SnxTgPzLLGax6uHeBULTtaEtcAvKjXfT7ZWtHzKjTpujMkUd9dDb8msDeAfnJxrgAYhr'
+      var key =
+        'xprv9s21ZrQH143K3ckY9DgU79uMTJkQRLdbCCVDh81SnxTgPzLLGax6uHeBULTtaEtcAvKjXfT7ZWtHzKjTpujMkUd9dDb8msDeAfnJxrgAYhr'
       var hdkey = HDNode.fromBase58(key)
-      assert.strictEqual(hdkey.keyPair.d.toBuffer(32).toString('hex'), '00000055378cf5fafb56c711c674143f9b0ee82ab0ba2924f19b64f5ae7cdbfd')
+      assert.strictEqual(
+        hdkey.keyPair.d.toBuffer(32).toString('hex'),
+        '00000055378cf5fafb56c711c674143f9b0ee82ab0ba2924f19b64f5ae7cdbfd',
+      )
 
-      var child0 = hdkey.derivePath('m/44\'/0\'/0\'/0/0\'')
-      var child1 = hdkey.derivePath('m/44\'/0\'/0\'/0/0\'')
+      var child0 = hdkey.derivePath("m/44'/0'/0'/0/0'")
+      var child1 = hdkey.derivePath("m/44'/0'/0'/0/0'")
 
       // check for equal object references
       assert.strictEqual(child0, child1)

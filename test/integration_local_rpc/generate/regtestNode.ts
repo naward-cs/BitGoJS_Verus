@@ -1,62 +1,57 @@
-;
 /**
  * @prettier
  */
-import { spawn } from 'child_process';
-import * as crypto from 'crypto';
+import {spawn} from 'child_process'
+import * as crypto from 'crypto'
 
+import {getNetworkName} from '../../../src/coins'
+import {Network} from '../../../src/types'
 
-
-import { getNetworkName } from '../../../src/coins';
-import { Network } from '../../../src/types';
-
-
-
-
-
-const utxolib = require('../../../src');
+const utxolib = require('../../../src')
 
 type DockerImageParams = {
-  extraArgsDocker: string[];
-  image: string;
-  binary: string | undefined;
-  extraArgsNode: string[];
-};
+  extraArgsDocker: string[]
+  image: string
+  binary: string | undefined
+  extraArgsNode: string[]
+}
 
-const rpcPort = 18333;
-const rpcUser = 'utxolib';
-const rpcPassword = crypto.randomBytes(16).toString('hex');
+const rpcPort = 18333
+const rpcUser = 'utxolib'
+const rpcPassword = crypto.randomBytes(16).toString('hex')
 
 function dockerImage(
   image: string,
   binary: string | undefined,
   extraArgsNode: string[] = [],
-  extraArgsDocker: string[] = []
+  extraArgsDocker: string[] = [],
 ): DockerImageParams {
-  return { image, binary, extraArgsNode, extraArgsDocker };
+  return {image, binary, extraArgsNode, extraArgsDocker}
 }
 
 function getDockerParams(network: Network): DockerImageParams {
   switch (network) {
     case utxolib.networks.testnet:
-      return dockerImage('ruimarinho/bitcoin-core:0.21.1', 'bitcoind', ['-fallbackfee=0.0001']);
+      return dockerImage('ruimarinho/bitcoin-core:0.21.1', 'bitcoind', [
+        '-fallbackfee=0.0001',
+      ])
     case utxolib.networks.bitcoincashTestnet:
-      return dockerImage('zquestz/bitcoin-cash-node:23.0.0', 'bitcoind');
+      return dockerImage('zquestz/bitcoin-cash-node:23.0.0', 'bitcoind')
     case utxolib.networks.bitcoinsvTestnet:
       return dockerImage('bitcoinsv/bitcoin-sv:1.0.5', 'bitcoind', [
         '-excessiveblocksize=0',
         '-maxstackmemoryusageconsensus=0',
-      ]);
+      ])
     case utxolib.networks.bitcoingoldTestnet:
-      return dockerImage('uphold/bitcoin-gold:0.17.3', 'bgoldd');
+      return dockerImage('uphold/bitcoin-gold:0.17.3', 'bgoldd')
     case utxolib.networks.dashTest:
-      return dockerImage('dashpay/dashd:0.16.1.1', 'dashd');
+      return dockerImage('dashpay/dashd:0.16.1.1', 'dashd')
     case utxolib.networks.litecoinTest:
-      return dockerImage('uphold/litecoin-core:0.17.1', 'litecoind');
+      return dockerImage('uphold/litecoin-core:0.17.1', 'litecoind')
     case utxolib.networks.zcashTest:
-      const paramsDir = process.env.ZCASH_PARAMS_DIR;
+      const paramsDir = process.env.ZCASH_PARAMS_DIR
       if (!paramsDir) {
-        throw new Error(`envvar ZCASH_PARAMS_DIR not set`);
+        throw new Error(`envvar ZCASH_PARAMS_DIR not set`)
       }
       return dockerImage(
         'electriccoinco/zcashd:v4.4.0',
@@ -68,18 +63,18 @@ function getDockerParams(network: Network): DockerImageParams {
           '-nuparams=f5b9230b:40',
           '-nuparams=e9ff75a6:50',
         ],
-        [`--volume=${paramsDir}:/srv/zcashd/.zcash-params`]
-      );
+        [`--volume=${paramsDir}:/srv/zcashd/.zcash-params`],
+      )
   }
-  throw new Error(`unsupported network ${getNetworkName(network)}`);
+  throw new Error(`unsupported network ${getNetworkName(network)}`)
 }
 
 export interface Node {
-  stop(): Promise<void>;
+  stop(): Promise<void>
 }
 
 export async function getRegtestNode(network: Network): Promise<Node> {
-  const dockerParams = getDockerParams(network);
+  const dockerParams = getDockerParams(network)
   const args = [
     'run',
     `--publish=${rpcPort}:${rpcPort}`,
@@ -93,30 +88,30 @@ export async function getRegtestNode(network: Network): Promise<Node> {
     `-rpcbind=0.0.0.0:${rpcPort}`,
     `-rpcallowip=0.0.0.0/0`,
     ...dockerParams.extraArgsNode,
-  ] as string[];
+  ] as string[]
 
-  let stdio: 'ignore' | 'inherit' = 'ignore';
+  let stdio: 'ignore' | 'inherit' = 'ignore'
   if (process.env.UTXOLIB_TESTS_LOG_DOCKER === '1') {
-    stdio = 'inherit';
+    stdio = 'inherit'
   }
 
-  const proc = spawn('docker', args, { stdio });
+  const proc = spawn('docker', args, {stdio})
 
   return {
     stop(): Promise<void> {
-      proc.kill();
+      proc.kill()
       return new Promise((resolve, reject) => {
         proc.on('exit', (code, signal) => {
           if (code === 0) {
-            return resolve();
+            return resolve()
           }
-          reject(new Error(`code=${code} signal=${signal}`));
-        });
-      });
+          reject(new Error(`code=${code} signal=${signal}`))
+        })
+      })
     },
-  };
+  }
 }
 
 export function getRegtestNodeUrl(network: Network): string {
-  return `http://${rpcUser}:${rpcPassword}@localhost:${rpcPort}`;
+  return `http://${rpcUser}:${rpcPassword}@localhost:${rpcPort}`
 }

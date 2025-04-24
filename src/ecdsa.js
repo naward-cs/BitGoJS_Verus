@@ -13,12 +13,11 @@ var ecurve = require('ecurve')
 var secp256k1 = ecurve.getCurveByName('secp256k1')
 
 // https://tools.ietf.org/html/rfc6979#section-3.2
-function deterministicGenerateK (hash, x, checkSig) {
-  typeforce(types.tuple(
-    types.Hash256bit,
-    types.Buffer256bit,
-    types.Function
-  ), arguments)
+function deterministicGenerateK(hash, x, checkSig) {
+  typeforce(
+    types.tuple(types.Hash256bit, types.Buffer256bit, types.Function),
+    arguments,
+  )
 
   // Step A, ignored as hash already provided
   // Step B
@@ -56,10 +55,7 @@ function deterministicGenerateK (hash, x, checkSig) {
 
   // Step H3, repeat until T is within the interval [1, n - 1] and is suitable for ECDSA
   while (T.signum() <= 0 || T.compareTo(secp256k1.n) >= 0 || !checkSig(T)) {
-    k = createHmac('sha256', k)
-      .update(v)
-      .update(ZERO)
-      .digest()
+    k = createHmac('sha256', k).update(v).update(ZERO).digest()
 
     v = createHmac('sha256', k).update(v).digest()
 
@@ -74,7 +70,7 @@ function deterministicGenerateK (hash, x, checkSig) {
 
 var N_OVER_TWO = secp256k1.n.shiftRight(1)
 
-function sign (hash, d) {
+function sign(hash, d) {
   typeforce(types.tuple(types.Hash256bit, types.BigInt), arguments)
 
   var x = d.toBuffer(32)
@@ -91,7 +87,10 @@ function sign (hash, d) {
     r = Q.affineX.mod(n)
     if (r.signum() === 0) return false
 
-    s = k.modInverse(n).multiply(e.add(d.multiply(r))).mod(n)
+    s = k
+      .modInverse(n)
+      .multiply(e.add(d.multiply(r)))
+      .mod(n)
     if (s.signum() === 0) return false
 
     return true
@@ -105,12 +104,11 @@ function sign (hash, d) {
   return new ECSignature(r, s)
 }
 
-function verify (hash, signature, Q) {
-  typeforce(types.tuple(
-    types.Hash256bit,
-    types.ECSignature,
-    types.ECPoint
-  ), arguments)
+function verify(hash, signature, Q) {
+  typeforce(
+    types.tuple(types.Hash256bit, types.ECSignature, types.ECPoint),
+    arguments,
+  )
 
   var n = secp256k1.n
   var G = secp256k1.G
@@ -157,5 +155,5 @@ module.exports = {
   verify: verify,
 
   // TODO: remove
-  __curve: secp256k1
+  __curve: secp256k1,
 }

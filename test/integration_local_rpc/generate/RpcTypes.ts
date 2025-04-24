@@ -1,17 +1,17 @@
 export type RpcInput = {
-  txid: string;
-};
+  txid: string
+}
 
 export type RpcOutput = {
-  value: number;
-};
+  value: number
+}
 
 export type RpcTransaction = {
-  txid: string;
-  version: number;
-  locktime: number;
-  size: number;
-  hex: string;
-  vin: RpcInput[];
-  vout: RpcOutput[];
-};
+  txid: string
+  version: number
+  locktime: number
+  size: number
+  hex: string
+  vin: RpcInput[]
+  vout: RpcOutput[]
+}

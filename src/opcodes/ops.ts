@@ -148,4 +148,3 @@ const OP_INT_BASE = OPS.OP_RESERVED // OP_1 - 1
 
 // Export modules
 export {OP_INT_BASE, OPS, REVERSE_OPS}
-

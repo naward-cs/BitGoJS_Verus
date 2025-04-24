@@ -1,3 +1,5 @@
+import type {Network} from './types'
+
 import {default as debugTb} from 'debug'
 
 import baddress from './address'
@@ -13,7 +15,6 @@ import SmartTransactionSignature from './smart_transaction_signature'
 import SmartTransactionSignatures from './smart_transaction_signatures'
 import * as btemplates from './templates'
 import Transaction from './transaction'
-import type {Network} from './types'
 
 const scriptTypes = btemplates.types
 
@@ -580,7 +581,10 @@ export default class TransactionBuilder {
   prevTxMap: {}
   inputs: never[]
   tx: Transaction
-  constructor(public network:Network = networks.bitcoin, public maximumFeeRate:number = 2500) {
+  constructor(
+    public network: Network = networks.bitcoin,
+    public maximumFeeRate: number = 2500,
+  ) {
     this.prevTxMap = {}
     //?? defaulted this.network = network || networks.bitcoin
 

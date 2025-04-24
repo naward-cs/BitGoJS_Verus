@@ -9,29 +9,31 @@ var OPS = require('bitcoin-ops')
 var REVERSE_OPS = require('bitcoin-ops/map')
 var OP_INT_BASE = OPS.OP_RESERVED // OP_1 - 1
 
-function isOPInt (value) {
-  return types.Number(value) &&
-    ((value === OPS.OP_0) ||
-    (value >= OPS.OP_1 && value <= OPS.OP_16) ||
-    (value === OPS.OP_1NEGATE))
+function isOPInt(value) {
+  return (
+    types.Number(value) &&
+    (value === OPS.OP_0 ||
+      (value >= OPS.OP_1 && value <= OPS.OP_16) ||
+      value === OPS.OP_1NEGATE)
+  )
 }
 
-function isPushOnlyChunk (value) {
+function isPushOnlyChunk(value) {
   return types.Buffer(value) || isOPInt(value)
 }
 
-function isPushOnly (value) {
+function isPushOnly(value) {
   return types.Array(value) && value.every(isPushOnlyChunk)
 }
 
-function asMinimalOP (buffer) {
+function asMinimalOP(buffer) {
   if (buffer.length === 0) return OPS.OP_0
   if (buffer.length !== 1) return
   if (buffer[0] >= 1 && buffer[0] <= 16) return OP_INT_BASE + buffer[0]
   if (buffer[0] === 0x81) return OPS.OP_1NEGATE
 }
 
-function compile (chunks) {
+function compile(chunks) {
   // TODO: remove me
   if (Buffer.isBuffer(chunks)) return chunks
 
@@ -70,7 +72,7 @@ function compile (chunks) {
       chunk.copy(buffer, offset)
       offset += chunk.length
 
-    // opcode
+      // opcode
     } else {
       buffer.writeUInt8(chunk, offset)
       offset += 1
@@ -81,7 +83,7 @@ function compile (chunks) {
   return buffer
 }
 
-function decompile (buffer) {
+function decompile(buffer) {
   // TODO: remove me
   if (types.Array(buffer)) return buffer
 
@@ -94,7 +96,7 @@ function decompile (buffer) {
     var opcode = buffer[i]
 
     // data chunk
-    if ((opcode > OPS.OP_0) && (opcode <= OPS.OP_PUSHDATA4)) {
+    if (opcode > OPS.OP_0 && opcode <= OPS.OP_PUSHDATA4) {
       var d = pushdata.decode(buffer, i)
 
       // did reading a pushDataInt fail? empty script
@@ -116,7 +118,7 @@ function decompile (buffer) {
         chunks.push(data)
       }
 
-    // opcode
+      // opcode
     } else {
       chunks.push(opcode)
 
@@ -127,38 +129,42 @@ function decompile (buffer) {
   return chunks
 }
 
-function toASM (chunks) {
+function toASM(chunks) {
   if (Buffer.isBuffer(chunks)) {
     chunks = decompile(chunks)
   }
 
-  return chunks.map(function (chunk) {
-    // data?
-    if (Buffer.isBuffer(chunk)) {
-      var op = asMinimalOP(chunk)
-      if (op === undefined) return chunk.toString('hex')
-      chunk = op
-    }
+  return chunks
+    .map(function (chunk) {
+      // data?
+      if (Buffer.isBuffer(chunk)) {
+        var op = asMinimalOP(chunk)
+        if (op === undefined) return chunk.toString('hex')
+        chunk = op
+      }
 
-    // opcode!
-    return REVERSE_OPS[chunk]
-  }).join(' ')
+      // opcode!
+      return REVERSE_OPS[chunk]
+    })
+    .join(' ')
 }
 
-function fromASM (asm) {
+function fromASM(asm) {
   typeforce(types.String, asm)
 
-  return compile(asm.split(' ').map(function (chunkStr) {
-    // opcode?
-    if (OPS[chunkStr] !== undefined) return OPS[chunkStr]
-    typeforce(types.Hex, chunkStr)
+  return compile(
+    asm.split(' ').map(function (chunkStr) {
+      // opcode?
+      if (OPS[chunkStr] !== undefined) return OPS[chunkStr]
+      typeforce(types.Hex, chunkStr)
 
-    // data!
-    return Buffer.from(chunkStr, 'hex')
-  }))
+      // data!
+      return Buffer.from(chunkStr, 'hex')
+    }),
+  )
 }
 
-function toStack (chunks) {
+function toStack(chunks) {
   chunks = decompile(chunks)
   typeforce(isPushOnly, chunks)
 
@@ -170,7 +176,7 @@ function toStack (chunks) {
   })
 }
 
-function isCanonicalPubKey (buffer) {
+function isCanonicalPubKey(buffer) {
   if (!Buffer.isBuffer(buffer)) return false
   if (buffer.length < 33) return false
 
@@ -185,14 +191,14 @@ function isCanonicalPubKey (buffer) {
   return false
 }
 
-function isDefinedHashType (hashType) {
+function isDefinedHashType(hashType) {
   var hashTypeMod = hashType & ~0xc0
 
-// return hashTypeMod > SIGHASH_ALL && hashTypeMod < SIGHASH_SINGLE
+  // return hashTypeMod > SIGHASH_ALL && hashTypeMod < SIGHASH_SINGLE
   return hashTypeMod > 0x00 && hashTypeMod < 0x04
 }
 
-function isCanonicalSignature (buffer) {
+function isCanonicalSignature(buffer) {
   if (!Buffer.isBuffer(buffer)) return false
   if (!isDefinedHashType(buffer[buffer.length - 1])) return false
 
@@ -211,5 +217,5 @@ module.exports = {
   isCanonicalPubKey: isCanonicalPubKey,
   isCanonicalSignature: isCanonicalSignature,
   isPushOnly: isPushOnly,
-  isDefinedHashType: isDefinedHashType
+  isDefinedHashType: isDefinedHashType,
 }

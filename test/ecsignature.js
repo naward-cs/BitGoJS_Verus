@@ -11,7 +11,10 @@ describe('ECSignature', function () {
   describe('toCompact', function () {
     fixtures.valid.forEach(function (f) {
       it('exports ' + f.compact.hex + ' correctly', function () {
-        var signature = new ECSignature(new BigInteger(f.signature.r), new BigInteger(f.signature.s))
+        var signature = new ECSignature(
+          new BigInteger(f.signature.r),
+          new BigInteger(f.signature.s),
+        )
 
         var buffer = signature.toCompact(f.compact.i, f.compact.compressed)
         assert.strictEqual(buffer.toString('hex'), f.compact.hex)
@@ -46,7 +49,10 @@ describe('ECSignature', function () {
   describe('toDER', function () {
     fixtures.valid.forEach(function (f) {
       it('exports ' + f.DER + ' correctly', function () {
-        var signature = new ECSignature(new BigInteger(f.signature.r), new BigInteger(f.signature.s))
+        var signature = new ECSignature(
+          new BigInteger(f.signature.r),
+          new BigInteger(f.signature.s),
+        )
 
         var DER = signature.toDER()
         assert.strictEqual(DER.toString('hex'), f.DER)
@@ -79,16 +85,27 @@ describe('ECSignature', function () {
   describe('toScriptSignature', function () {
     fixtures.valid.forEach(function (f) {
       it('exports ' + f.scriptSignature.hex + ' correctly', function () {
-        var signature = new ECSignature(new BigInteger(f.signature.r), new BigInteger(f.signature.s))
+        var signature = new ECSignature(
+          new BigInteger(f.signature.r),
+          new BigInteger(f.signature.s),
+        )
 
-        var scriptSignature = signature.toScriptSignature(f.scriptSignature.hashType)
-        assert.strictEqual(scriptSignature.toString('hex'), f.scriptSignature.hex)
+        var scriptSignature = signature.toScriptSignature(
+          f.scriptSignature.hashType,
+        )
+        assert.strictEqual(
+          scriptSignature.toString('hex'),
+          f.scriptSignature.hex,
+        )
       })
     })
 
     fixtures.invalid.scriptSignature.forEach(function (f) {
       it('throws ' + f.exception, function () {
-        var signature = new ECSignature(new BigInteger(f.signature.r), new BigInteger(f.signature.s))
+        var signature = new ECSignature(
+          new BigInteger(f.signature.r),
+          new BigInteger(f.signature.s),
+        )
 
         assert.throws(function () {
           signature.toScriptSignature(f.hashType)

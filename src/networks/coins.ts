@@ -9,7 +9,6 @@ import type {
 
 import {includes, isEqual} from 'es-toolkit/compat'
 
-
 import {anyOf} from '../lib/type-guard'
 import {coins, networks} from './networks'
 

@@ -4,13 +4,20 @@ var varuint = require('varuint-bitcoin')
 const TxDestination = require('./tx_destination')
 const bufferutils = require('./bufferutils')
 
-function varSliceSize (varSlice) {
+function varSliceSize(varSlice) {
   var length = varSlice.length
   return varuint.encodingLength(length) + length
 }
 
 class OptCCParams {
-  constructor (version = 3, evalCode = 0, m = 1, n = 1, destinations = [], serializedObjects = []) {
+  constructor(
+    version = 3,
+    evalCode = 0,
+    m = 1,
+    n = 1,
+    destinations = [],
+    serializedObjects = [],
+  ) {
     this.version = version
     this.evalCode = evalCode
     this.m = m
@@ -22,12 +29,11 @@ class OptCCParams {
     this.error = null
   }
 
-  getParamObject () {
+  getParamObject() {
     switch (this.evalCode) {
-      case EVALS.EVAL_NONE:
-        {
-          return null
-        }
+      case EVALS.EVAL_NONE: {
+        return null
+      }
 
       case EVALS.EVAL_STAKEGUARD:
       case EVALS.EVAL_CURRENCY_DEFINITION:
@@ -46,30 +52,27 @@ class OptCCParams {
       case EVALS.EVAL_IDENTITY_RESERVATION:
       case EVALS.EVAL_FINALIZE_EXPORT:
       case EVALS.EVAL_FEE_POOL:
-      case EVALS.EVAL_NOTARY_SIGNATURE:
-        {
-          if (this.vData.length) {
-            return this.vData[0]
-          } else {
-            return null
-          }
-        }
-
-      default:
-        {
+      case EVALS.EVAL_NOTARY_SIGNATURE: {
+        if (this.vData.length) {
+          return this.vData[0]
+        } else {
           return null
         }
+      }
+
+      default: {
+        return null
+      }
     }
   }
 
-  isValid () {
+  isValid() {
     var validEval = false
     switch (this.evalCode) {
-      case EVALS.EVAL_NONE:
-        {
-          validEval = true
-          break
-        }
+      case EVALS.EVAL_NONE: {
+        validEval = true
+        break
+      }
 
       case EVALS.EVAL_STAKEGUARD:
       case EVALS.EVAL_CURRENCY_DEFINITION:
@@ -88,22 +91,25 @@ class OptCCParams {
       case EVALS.EVAL_IDENTITY_RESERVATION:
       case EVALS.EVAL_FINALIZE_EXPORT:
       case EVALS.EVAL_FEE_POOL:
-      case EVALS.EVAL_NOTARY_SIGNATURE:
-        {
-          validEval = this.vData && this.vData.length > 0
-        }
+      case EVALS.EVAL_NOTARY_SIGNATURE: {
+        validEval = this.vData && this.vData.length > 0
+      }
     }
     return (
       validEval &&
       this.version > 0 &&
       this.version < 4 &&
-      ((this.version < 3 && this.evalCode < 2) || (this.evalCode <= 26 && this.m <= this.n))
+      ((this.version < 3 && this.evalCode < 2) ||
+        (this.evalCode <= 26 && this.m <= this.n))
     )
   }
 
-  static fromChunk (chunk) {
-    const writer = new bufferutils.BufferWriter(Buffer.alloc(varuint.encodingLength(chunk.length)), 0);
-    writer.writeVarInt(chunk.length);
+  static fromChunk(chunk) {
+    const writer = new bufferutils.BufferWriter(
+      Buffer.alloc(varuint.encodingLength(chunk.length)),
+      0,
+    )
+    writer.writeVarInt(chunk.length)
 
     const params = new OptCCParams()
 
@@ -112,25 +118,25 @@ class OptCCParams {
     return params
   }
 
-  toChunk () {
-    return this.toBuffer(undefined, undefined, true);
+  toChunk() {
+    return this.toBuffer(undefined, undefined, true)
   }
 
-  fromBuffer (buffer, initialOffset = 0) {
+  fromBuffer(buffer, initialOffset = 0) {
     // the first element in this buffer will be a script to decompile and get pushed data from
     var offset = initialOffset
-    function readSlice (n) {
+    function readSlice(n) {
       offset += n
       return buffer.slice(offset - n, offset)
     }
 
-    function readVarInt () {
+    function readVarInt() {
       var vi = varuint.decode(buffer, offset)
       offset += varuint.decode.bytes
       return vi
     }
 
-    function readVarSlice () {
+    function readVarSlice() {
       return readSlice(readVarInt())
     }
 
@@ -150,14 +156,16 @@ class OptCCParams {
     this.n = chunks[0].readUInt8(3)
 
     // now, we should have n keys followed by data objects for later versions, otherwise all keys and one data object
-    if (this.version <= 0 ||
-        this.version > 3 ||
-        this.evalCode < 0 ||
-        this.evalCode > 0x1a || // this is the last valid eval code as of version 3
-        (this.version < 3 && this.n < 1) ||
-        this.n > 4 ||
-        (this.version < 3 && this.n >= chunks.length) ||
-        this.n > chunks.length) {
+    if (
+      this.version <= 0 ||
+      this.version > 3 ||
+      this.evalCode < 0 ||
+      this.evalCode > 0x1a || // this is the last valid eval code as of version 3
+      (this.version < 3 && this.n < 1) ||
+      this.n > 4 ||
+      (this.version < 3 && this.n >= chunks.length) ||
+      this.n > chunks.length
+    ) {
       // invalid header values
       this.version = 0
       this.error = new Error('invalid header values')
@@ -187,7 +195,7 @@ class OptCCParams {
     return offset
   }
 
-  __byteLength () {
+  __byteLength() {
     const chunks = [Buffer.allocUnsafe(4)]
     chunks[0][0] = this.version
     chunks[0][1] = this.evalCode
@@ -203,14 +211,19 @@ class OptCCParams {
     return varSliceSize(bscript.compile(chunks))
   }
 
-  toBuffer (buffer, initialOffset, asChunk = false) {
+  toBuffer(buffer, initialOffset, asChunk = false) {
     var offset = initialOffset || 0
-    function writeSlice (slice) { offset += slice.copy(buffer, offset) }
-    function writeVarInt (i) {
+    function writeSlice(slice) {
+      offset += slice.copy(buffer, offset)
+    }
+    function writeVarInt(i) {
       varuint.encode(i, buffer, offset)
       offset += varuint.encode.bytes
     }
-    function writeVarSlice (slice) { writeVarInt(slice.length); writeSlice(slice) }
+    function writeVarSlice(slice) {
+      writeVarInt(slice.length)
+      writeSlice(slice)
+    }
 
     const chunks = [Buffer.allocUnsafe(4)]
     chunks[0][0] = this.version
@@ -225,14 +238,17 @@ class OptCCParams {
     })
 
     const scriptStore = bscript.compile(chunks)
-    if (!buffer) buffer = Buffer.allocUnsafe(asChunk ? scriptStore.length : varSliceSize(scriptStore))
+    if (!buffer)
+      buffer = Buffer.allocUnsafe(
+        asChunk ? scriptStore.length : varSliceSize(scriptStore),
+      )
 
     if (asChunk) {
       writeSlice(scriptStore)
     } else {
       writeVarSlice(scriptStore)
     }
-    
+
     // avoid slicing unless necessary
     if (initialOffset !== undefined) return buffer.slice(initialOffset, offset)
     // TODO (https://github.com/BitGo/bitgo-utxo-lib/issues/11): we shouldn't have to slice the final buffer

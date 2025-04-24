@@ -1,6 +1,6 @@
 var Buffer = require('safe-buffer').Buffer
 
-function decode (buffer, maxLength, minimal) {
+function decode(buffer, maxLength, minimal) {
   maxLength = maxLength || 4
   minimal = minimal === undefined ? true : minimal
 
@@ -9,7 +9,8 @@ function decode (buffer, maxLength, minimal) {
   if (length > maxLength) throw new TypeError('Script number overflow')
   if (minimal) {
     if ((buffer[length - 1] & 0x7f) === 0) {
-      if (length <= 1 || (buffer[length - 2] & 0x80) === 0) throw new Error('Non-minimally encoded script number')
+      if (length <= 1 || (buffer[length - 2] & 0x80) === 0)
+        throw new Error('Non-minimally encoded script number')
     }
   }
 
@@ -18,8 +19,8 @@ function decode (buffer, maxLength, minimal) {
     var a = buffer.readUInt32LE(0)
     var b = buffer.readUInt8(4)
 
-    if (b & 0x80) return -(((b & ~0x80) * 0x100000000) + a)
-    return (b * 0x100000000) + a
+    if (b & 0x80) return -((b & ~0x80) * 0x100000000 + a)
+    return b * 0x100000000 + a
   }
 
   var result = 0
@@ -29,20 +30,26 @@ function decode (buffer, maxLength, minimal) {
     result |= buffer[i] << (8 * i)
   }
 
-  if (buffer[length - 1] & 0x80) return -(result & ~(0x80 << (8 * (length - 1))))
+  if (buffer[length - 1] & 0x80)
+    return -(result & ~(0x80 << (8 * (length - 1))))
   return result
 }
 
-function scriptNumSize (i) {
-  return i > 0x7fffffff ? 5
-  : i > 0x7fffff ? 4
-  : i > 0x7fff ? 3
-  : i > 0x7f ? 2
-  : i > 0x00 ? 1
-  : 0
+function scriptNumSize(i) {
+  return i > 0x7fffffff
+    ? 5
+    : i > 0x7fffff
+      ? 4
+      : i > 0x7fff
+        ? 3
+        : i > 0x7f
+          ? 2
+          : i > 0x00
+            ? 1
+            : 0
 }
 
-function encode (number) {
+function encode(number) {
   var value = Math.abs(number)
   var size = scriptNumSize(value)
   var buffer = Buffer.allocUnsafe(size)
@@ -64,5 +71,5 @@ function encode (number) {
 
 module.exports = {
   decode: decode,
-  encode: encode
+  encode: encode,
 }

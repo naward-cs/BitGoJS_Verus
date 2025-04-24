@@ -1,8 +1,8 @@
 var Buffer = require('safe-buffer').Buffer
 var varuint = require('varuint-bitcoin')
 var bufferutils = require('./bufferutils')
-var { fromBase58Check } = require('./address')
-var { sha256 } = require('./crypto')
+var {fromBase58Check} = require('./address')
+var {sha256} = require('./crypto')
 var createHash = require('create-hash')
 var ECSignature = require('./ecsignature')
 var ECPair = require('./ecpair')
@@ -10,7 +10,7 @@ var ECPair = require('./ecpair')
 const VERUS_DATA_SIGNATURE_PREFIX_STRING = 'Verus signed data:\n'
 
 var bufferWriter = new bufferutils.BufferWriter(
-  Buffer.alloc(VERUS_DATA_SIGNATURE_PREFIX_STRING.length + 1)
+  Buffer.alloc(VERUS_DATA_SIGNATURE_PREFIX_STRING.length + 1),
 )
 
 bufferWriter.writeVarSlice(Buffer.from('Verus signed data:\n', 'utf-8'))
@@ -26,7 +26,15 @@ const HASH_SHA256 = 5
 const HASH_LASTTYPE = 5 // eslint-disable-line
 
 class IdentitySignature {
-  constructor (network, version = 2, hashType = HASH_SHA256, blockHeight = 0, signatures, chainId, iAddress) {
+  constructor(
+    network,
+    version = 2,
+    hashType = HASH_SHA256,
+    blockHeight = 0,
+    signatures,
+    chainId,
+    iAddress,
+  ) {
     this.version = version
     this.hashType = hashType
     this.blockHeight = blockHeight
@@ -43,18 +51,20 @@ class IdentitySignature {
     }
   }
 
-  assertSupported () {
-    if (this.version !== 1 && this.version !== 2) throw new Error('Unsupported version')
-    if (this.version === 2 && this.hashType !== HASH_SHA256) throw new Error('Unsupported hashtype')
+  assertSupported() {
+    if (this.version !== 1 && this.version !== 2)
+      throw new Error('Unsupported version')
+    if (this.version === 2 && this.hashType !== HASH_SHA256)
+      throw new Error('Unsupported hashtype')
   }
 
-  hashMessage (msg) {
+  hashMessage(msg) {
     const rawMsgBuffer = Buffer.from(msg, 'utf-8')
 
     var msgBufferWriter = new bufferutils.BufferWriter(
       Buffer.alloc(
-        varuint.encodingLength(rawMsgBuffer.length) + rawMsgBuffer.length
-      )
+        varuint.encodingLength(rawMsgBuffer.length) + rawMsgBuffer.length,
+      ),
     )
 
     msgBufferWriter.writeVarSlice(rawMsgBuffer)
@@ -73,29 +83,30 @@ class IdentitySignature {
         .update(_msgHash)
         .digest()
     } else {
-      return createHash("sha256")
+      return createHash('sha256')
         .update(this.chainId)
         .update(heightBufferWriter.buffer)
         .update(this.identity)
         .update(VERUS_DATA_SIGNATURE_PREFIX)
         .update(_msgHash)
-        .digest();
+        .digest()
     }
   }
 
-  signMessageOffline (msg, keyPair) {
+  signMessageOffline(msg, keyPair) {
     return this.signHashOffline(this.hashMessage(msg), keyPair)
   }
 
-  verifyMessageOffline (msg, signingAddress) {
+  verifyMessageOffline(msg, signingAddress) {
     return this.verifyHashOffline(this.hashMessage(msg), signingAddress)
   }
 
-  signHashOffline (buffer, keyPair) {
+  signHashOffline(buffer, keyPair) {
     this.assertSupported()
 
     var signature = keyPair.sign(buffer)
-    if (Buffer.isBuffer(signature)) signature = ECSignature.fromRSBuffer(signature)
+    if (Buffer.isBuffer(signature))
+      signature = ECSignature.fromRSBuffer(signature)
 
     const signingAddress = keyPair.getAddress()
 
@@ -106,7 +117,11 @@ class IdentitySignature {
     // correct pubkey is found. This is not the most efficient way to do this.
     for (recid = 0; recid < 4; recid++) {
       compactSig = signature.toCompact(recid, true)
-      const recoveredKeyPair = ECPair.recoverFromSignature(buffer, compactSig, this.network)
+      const recoveredKeyPair = ECPair.recoverFromSignature(
+        buffer,
+        compactSig,
+        this.network,
+      )
 
       if (recoveredKeyPair.getAddress() === signingAddress) {
         this.signatures.push(compactSig)
@@ -121,7 +136,7 @@ class IdentitySignature {
   // In this case keyPair refers to the ECPair containing at minimum
   // a pubkey. This function returns an array of booleans indicating which
   // signatures passed and failed
-  verifyHashOffline (hash, signingAddress) {
+  verifyHashOffline(hash, signingAddress) {
     this.assertSupported()
 
     if (this.signatures.length === 0) throw new Error('No signatures to verify')
@@ -131,7 +146,11 @@ class IdentitySignature {
       try {
         const sig = ECSignature.parseCompact(this.signatures[i])
 
-        const pubKeyPair = ECPair.recoverFromSignature(hash, sig.signature.toCompact(sig.i, true), this.network)
+        const pubKeyPair = ECPair.recoverFromSignature(
+          hash,
+          sig.signature.toCompact(sig.i, true),
+          this.network,
+        )
 
         if (pubKeyPair.getAddress() === signingAddress) {
           const verification = pubKeyPair.verify(hash, sig.signature)
@@ -148,7 +167,7 @@ class IdentitySignature {
     return results
   }
 
-  fromBuffer (buffer, initialOffset, chainId, iAddress) {
+  fromBuffer(buffer, initialOffset, chainId, iAddress) {
     var bufferReader = new bufferutils.BufferReader(buffer, initialOffset || 0)
 
     this.version = bufferReader.readUInt8()
@@ -170,10 +189,10 @@ class IdentitySignature {
     return bufferReader.offset
   }
 
-  __byteLength () {
+  __byteLength() {
     let totalSigLength = 0
 
-    this.signatures.forEach((sig) => {
+    this.signatures.forEach(sig => {
       totalSigLength += sig.length
     })
 
@@ -184,7 +203,7 @@ class IdentitySignature {
     )
   }
 
-  toBuffer (buffer, initialOffset) {
+  toBuffer(buffer, initialOffset) {
     this.assertSupported()
 
     var noBuffer = !buffer
@@ -209,7 +228,9 @@ class IdentitySignature {
         : bufferWriter.offset
     }
     // TODO (https://github.com/BitGo/bitgo-utxo-lib/issues/11): we shouldn't have to slice the final buffer
-    return noBuffer ? bufferWriter.buffer.slice(0, bufferWriter.offset) : bufferWriter.offset
+    return noBuffer
+      ? bufferWriter.buffer.slice(0, bufferWriter.offset)
+      : bufferWriter.offset
   }
 }
 

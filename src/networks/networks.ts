@@ -16,6 +16,7 @@ forkId         src/script/interpreter.h  FORKID_*
 */
 
 import type {Network, NetworkName} from '../types'
+
 import {Prettify} from '../types/prettify'
 
 // /**
@@ -61,7 +62,7 @@ function getDefaultBip32Testnet(): Network['bip32'] {
   }
 }
 
-export const networks: Prettify<Record<NetworkName,Network>> = {
+export const networks: Prettify<Record<NetworkName, Network>> = {
   // https://github.com/bitcoin/bitcoin/blob/master/src/validation.cpp
   // https://github.com/bitcoin/bitcoin/blob/master/src/chainparams.cpp
   bitcoin: {
@@ -340,5 +341,3 @@ export const networks: Prettify<Record<NetworkName,Network>> = {
     isZcashCompatible: true,
   },
 }
-
-

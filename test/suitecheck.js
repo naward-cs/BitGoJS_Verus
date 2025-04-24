@@ -6,9 +6,11 @@ const assert = require('assert')
  * @param suite
  * @returns {*}
  */
-function countSuiteTests (suite) {
-  return suite.suites.reduce((sum, s) => sum + countSuiteTests(s), 0) +
+function countSuiteTests(suite) {
+  return (
+    suite.suites.reduce((sum, s) => sum + countSuiteTests(s), 0) +
     suite.tests.length
+  )
 }
 
 /*

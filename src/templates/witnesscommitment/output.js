@@ -8,18 +8,22 @@ var OPS = require('bitcoin-ops')
 
 var HEADER = Buffer.from('aa21a9ed', 'hex')
 
-function check (script) {
+function check(script) {
   var buffer = bscript.compile(script)
 
-  return buffer.length > 37 &&
+  return (
+    buffer.length > 37 &&
     buffer[0] === OPS.OP_RETURN &&
     buffer[1] === 0x24 &&
     buffer.slice(2, 6).equals(HEADER)
+  )
 }
 
-check.toJSON = function () { return 'Witness commitment output' }
+check.toJSON = function () {
+  return 'Witness commitment output'
+}
 
-function encode (commitment) {
+function encode(commitment) {
   typeforce(types.Hash256bit, commitment)
 
   var buffer = Buffer.allocUnsafe(36)
@@ -29,7 +33,7 @@ function encode (commitment) {
   return bscript.compile([OPS.OP_RETURN, buffer])
 }
 
-function decode (buffer) {
+function decode(buffer) {
   typeforce(check, buffer)
 
   return bscript.decompile(buffer)[1].slice(4, 36)
@@ -38,5 +42,5 @@ function decode (buffer) {
 module.exports = {
   check: check,
   decode: decode,
-  encode: encode
+  encode: encode,
 }

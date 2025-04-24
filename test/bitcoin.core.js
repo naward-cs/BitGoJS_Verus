@@ -39,8 +39,8 @@ describe('Bitcoin-core', function () {
   // base58KeysValid
   describe('address.toBase58Check', function () {
     var typeMap = {
-      'pubkey': 'pubKeyHash',
-      'script': 'scriptHash'
+      pubkey: 'pubKeyHash',
+      script: 'scriptHash',
     }
 
     base58KeysValid.forEach(function (f) {
@@ -50,11 +50,16 @@ describe('Bitcoin-core', function () {
 
       if (params.isPrivkey) return
 
-      var network = params.isTestnet ? bitcoin.networks.testnet : bitcoin.networks.bitcoin
+      var network = params.isTestnet
+        ? bitcoin.networks.testnet
+        : bitcoin.networks.bitcoin
       var version = network[typeMap[params.addrType]]
 
       it('can export ' + expected, function () {
-        assert.strictEqual(bitcoin.address.toBase58Check(hash, version), expected)
+        assert.strictEqual(
+          bitcoin.address.toBase58Check(hash, version),
+          expected,
+        )
       })
     })
   })
@@ -65,7 +70,7 @@ describe('Bitcoin-core', function () {
       bitcoin.networks.bitcoin.pubkeyhash,
       bitcoin.networks.bitcoin.scripthash,
       bitcoin.networks.testnet.pubkeyhash,
-      bitcoin.networks.testnet.scripthash
+      bitcoin.networks.testnet.scripthash,
     ]
 
     base58KeysInvalid.forEach(function (f) {
@@ -75,7 +80,11 @@ describe('Bitcoin-core', function () {
         assert.throws(function () {
           var address = bitcoin.address.fromBase58Check(string)
 
-          assert.notEqual(allowedNetworks.indexOf(address.version), -1, 'Invalid network')
+          assert.notEqual(
+            allowedNetworks.indexOf(address.version),
+            -1,
+            'Invalid network',
+          )
         }, /(Invalid (checksum|network))|(too (short|long))/)
       })
     })
@@ -90,7 +99,9 @@ describe('Bitcoin-core', function () {
 
       if (!params.isPrivkey) return
 
-      var network = params.isTestnet ? bitcoin.networks.testnet : bitcoin.networks.bitcoin
+      var network = params.isTestnet
+        ? bitcoin.networks.testnet
+        : bitcoin.networks.bitcoin
       var keyPair = bitcoin.ECPair.fromWIF(string, network)
 
       it('fromWIF imports ' + string, function () {
@@ -106,10 +117,7 @@ describe('Bitcoin-core', function () {
 
   // base58KeysInvalid
   describe('ECPair.fromWIF', function () {
-    var allowedNetworks = [
-      bitcoin.networks.bitcoin,
-      bitcoin.networks.testnet
-    ]
+    var allowedNetworks = [bitcoin.networks.bitcoin, bitcoin.networks.testnet]
 
     base58KeysInvalid.forEach(function (f) {
       var string = f[0]
@@ -175,26 +183,35 @@ describe('Bitcoin-core', function () {
       var expectedHash = f[4]
 
       var hashTypes = []
-      if ((hashType & 0x1f) === bitcoin.Transaction.SIGHASH_NONE) hashTypes.push('SIGHASH_NONE')
-      else if ((hashType & 0x1f) === bitcoin.Transaction.SIGHASH_SINGLE) hashTypes.push('SIGHASH_SINGLE')
+      if ((hashType & 0x1f) === bitcoin.Transaction.SIGHASH_NONE)
+        hashTypes.push('SIGHASH_NONE')
+      else if ((hashType & 0x1f) === bitcoin.Transaction.SIGHASH_SINGLE)
+        hashTypes.push('SIGHASH_SINGLE')
       else hashTypes.push('SIGHASH_ALL')
-      if (hashType & bitcoin.Transaction.SIGHASH_ANYONECANPAY) hashTypes.push('SIGHASH_ANYONECANPAY')
+      if (hashType & bitcoin.Transaction.SIGHASH_ANYONECANPAY)
+        hashTypes.push('SIGHASH_ANYONECANPAY')
 
       var hashTypeName = hashTypes.join(' | ')
 
-      it('should hash ' + txHex.slice(0, 40) + '... (' + hashTypeName + ')', function () {
-        var transaction = bitcoin.Transaction.fromHex(txHex)
-        assert.strictEqual(transaction.toHex(), txHex)
+      it(
+        'should hash ' + txHex.slice(0, 40) + '... (' + hashTypeName + ')',
+        function () {
+          var transaction = bitcoin.Transaction.fromHex(txHex)
+          assert.strictEqual(transaction.toHex(), txHex)
 
-        var script = Buffer.from(scriptHex, 'hex')
-        var scriptChunks = bitcoin.script.decompile(script)
-        assert.strictEqual(bitcoin.script.compile(scriptChunks).toString('hex'), scriptHex)
+          var script = Buffer.from(scriptHex, 'hex')
+          var scriptChunks = bitcoin.script.decompile(script)
+          assert.strictEqual(
+            bitcoin.script.compile(scriptChunks).toString('hex'),
+            scriptHex,
+          )
 
-        var hash = transaction.hashForSignature(inIndex, script, hashType)
+          var hash = transaction.hashForSignature(inIndex, script, hashType)
 
-        // reverse because test data is reversed
-        assert.equal(hash.reverse().toString('hex'), expectedHash)
-      })
+          // reverse because test data is reversed
+          assert.equal(hash.reverse().toString('hex'), expectedHash)
+        },
+      )
     })
   })
 

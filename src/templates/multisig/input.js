@@ -1,17 +1,17 @@
 // OP_0 [signatures ...]
 
-var Buffer = require('safe-buffer').Buffer
-var bscript = require('../../script')
-var p2mso = require('./output')
-var typeforce = require('typeforce')
-var OPS = require('bitcoin-ops')
+const Buffer = require('safe-buffer').Buffer
+const bscript = require('../../script')
+const p2mso = require('./output')
+const typeforce = require('typeforce')
+const OPS = require('bitcoin-ops')
 
-function partialSignature (value) {
+function partialSignature(value) {
   return value === OPS.OP_0 || bscript.isCanonicalSignature(value)
 }
 
-function check (script, allowIncomplete) {
-  var chunks = bscript.decompile(script)
+function check(script, allowIncomplete) {
+  const chunks = bscript.decompile(script)
   if (chunks.length < 2) return false
   if (chunks[0] !== OPS.OP_0) return false
 
@@ -21,15 +21,17 @@ function check (script, allowIncomplete) {
 
   return chunks.slice(1).every(bscript.isCanonicalSignature)
 }
-check.toJSON = function () { return 'multisig input' }
+check.toJSON = function () {
+  return 'multisig input'
+}
 
-var EMPTY_BUFFER = Buffer.allocUnsafe(0)
+const EMPTY_BUFFER = Buffer.allocUnsafe(0)
 
-function encodeStack (signatures, scriptPubKey) {
+function encodeStack(signatures, scriptPubKey) {
   typeforce([partialSignature], signatures)
 
   if (scriptPubKey) {
-    var scriptData = p2mso.decode(scriptPubKey)
+    const scriptData = p2mso.decode(scriptPubKey)
 
     if (signatures.length < scriptData.m) {
       throw new TypeError('Not enough signatures provided')
@@ -40,25 +42,28 @@ function encodeStack (signatures, scriptPubKey) {
     }
   }
 
-  return [].concat(EMPTY_BUFFER, signatures.map(function (sig) {
-    if (sig === OPS.OP_0) {
-      return EMPTY_BUFFER
-    }
-    return sig
-  }))
+  return [].concat(
+    EMPTY_BUFFER,
+    signatures.map(function (sig) {
+      if (sig === OPS.OP_0) {
+        return EMPTY_BUFFER
+      }
+      return sig
+    }),
+  )
 }
 
-function encode (signatures, scriptPubKey) {
+function encode(signatures, scriptPubKey) {
   return bscript.compile(encodeStack(signatures, scriptPubKey))
 }
 
-function decodeStack (stack, allowIncomplete) {
+function decodeStack(stack, allowIncomplete) {
   typeforce(check, stack, allowIncomplete)
   return stack.slice(1)
 }
 
-function decode (buffer, allowIncomplete) {
-  var stack = bscript.decompile(buffer)
+function decode(buffer, allowIncomplete) {
+  const stack = bscript.decompile(buffer)
   return decodeStack(stack, allowIncomplete)
 }
 
@@ -67,5 +72,5 @@ module.exports = {
   decode: decode,
   decodeStack: decodeStack,
   encode: encode,
-  encodeStack: encodeStack
+  encodeStack: encodeStack,
 }

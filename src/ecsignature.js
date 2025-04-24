@@ -4,7 +4,7 @@ var types = require('./types')
 
 var BigInteger = require('bigi')
 
-function ECSignature (r, s) {
+function ECSignature(r, s) {
   typeforce(types.tuple(types.BigInt, types.BigInt), arguments)
 
   this.r = r
@@ -15,7 +15,8 @@ ECSignature.parseCompact = function (buffer) {
   typeforce(types.BufferN(65), buffer)
 
   var flagByte = buffer.readUInt8(0) - 27
-  if (flagByte !== (flagByte & 7)) throw new Error('Invalid signature parameter')
+  if (flagByte !== (flagByte & 7))
+    throw new Error('Invalid signature parameter')
 
   var compressed = !!(flagByte & 4)
   var recoveryParam = flagByte & 3
@@ -24,7 +25,7 @@ ECSignature.parseCompact = function (buffer) {
   return {
     compressed: compressed,
     i: recoveryParam,
-    signature: signature
+    signature: signature,
   }
 }
 
@@ -49,11 +50,12 @@ ECSignature.parseScriptSignature = function (buffer) {
   var hashType = buffer.readUInt8(buffer.length - 1)
   var hashTypeMod = hashType & ~0xc0
 
-  if (hashTypeMod <= 0x00 || hashTypeMod >= 0x04) throw new Error('Invalid hashType ' + hashType)
+  if (hashTypeMod <= 0x00 || hashTypeMod >= 0x04)
+    throw new Error('Invalid hashType ' + hashType)
 
   return {
     signature: ECSignature.fromDER(buffer.slice(0, -1)),
-    hashType: hashType
+    hashType: hashType,
   }
 }
 
@@ -86,7 +88,8 @@ ECSignature.prototype.toRSBuffer = function (buffer, offset) {
 
 ECSignature.prototype.toScriptSignature = function (hashType) {
   var hashTypeMod = hashType & ~0xc0
-  if (hashTypeMod <= 0 || hashTypeMod >= 4) throw new Error('Invalid hashType ' + hashType)
+  if (hashTypeMod <= 0 || hashTypeMod >= 4)
+    throw new Error('Invalid hashType ' + hashType)
 
   var hashTypeBuffer = Buffer.alloc(1)
   hashTypeBuffer.writeUInt8(hashType, 0)

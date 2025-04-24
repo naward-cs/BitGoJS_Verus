@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type {randomBytes} from 'crypto'
 
-
 declare module 'bigi' {
   interface RandomGenerator extends randomBytes {
     nextBytes(bytes: number[]): void
@@ -12,14 +11,7 @@ declare module 'bigi' {
     abs(): bigi
     add(a: bigi): bigi
     addTo(a: bigi, r: bigi): void
-    am(
-      i: number,
-      x: number,
-      w: bigi,
-      j: number,
-      c: number,
-      n: number,
-    ): number
+    am(i: number, x: number, w: bigi, j: number, c: number, n: number): number
     and(a: bigi): bigi
     andNot(a: bigi): bigi
     bitCount(): number
@@ -99,9 +91,7 @@ declare module 'bigi' {
     static fromByteArrayUnsigned(
       byteArray?: Buffer | Uint8Array | number[],
     ): number[]
-    static fromDERInteger(
-      byteArray?: Buffer | Uint8Array | number[],
-    ): bigi
+    static fromDERInteger(byteArray?: Buffer | Uint8Array | number[]): bigi
     static fromHex(hex: string): bigi
     static isbigi(obj: unknown, check_ver: any): obj is bigi
     static valueOf(i: number): bigi

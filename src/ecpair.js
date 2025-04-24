@@ -19,19 +19,23 @@ var secp256k1 = ecdsa.__curve
 
 var fastcurve = require('./fastcurve')
 
-function ECPair (d, Q, options) {
+function ECPair(d, Q, options) {
   if (options) {
-    typeforce({
-      compressed: types.maybe(types.Boolean),
-      network: types.maybe(types.Network)
-    }, options)
+    typeforce(
+      {
+        compressed: types.maybe(types.Boolean),
+        network: types.maybe(types.Network),
+      },
+      options,
+    )
   }
 
   options = options || {}
 
   if (d) {
     if (d.signum() <= 0) throw new Error('Private key must be greater than 0')
-    if (d.compareTo(secp256k1.n) >= 0) throw new Error('Private key must be less than the curve order')
+    if (d.compareTo(secp256k1.n) >= 0)
+      throw new Error('Private key must be less than the curve order')
     if (Q) throw new TypeError('Unexpected publicKey parameter')
 
     this.d = d
@@ -49,24 +53,33 @@ Object.defineProperty(ECPair.prototype, 'Q', {
   get: function () {
     if (!this.__Q && this.d) {
       const qBuf = fastcurve.publicKeyCreate(this.d.toBuffer(32), false)
-      this.__Q = qBuf ? ecurve.Point.decodeFrom(curve, qBuf) : secp256k1.G.multiply(this.d)
+      this.__Q = qBuf
+        ? ecurve.Point.decodeFrom(curve, qBuf)
+        : secp256k1.G.multiply(this.d)
     }
 
     return this.__Q
-  }
+  },
 })
 
 ECPair.recoverFromSignature = function (hashBuffer, compactSigBuffer, network) {
   const compactParsed = sig.parseCompact(compactSigBuffer)
   const ecSecp256k1 = new EC('secp256k1')
 
-  const pub = ecSecp256k1.recoverPubKey(new BN(hashBuffer, 16).toString(10), {
-    r: compactParsed.signature.r.toBuffer(),
-    s: compactParsed.signature.s.toBuffer(),
-    recoveryParam: compactParsed.i
-  }, compactParsed.i)
+  const pub = ecSecp256k1.recoverPubKey(
+    new BN(hashBuffer, 16).toString(10),
+    {
+      r: compactParsed.signature.r.toBuffer(),
+      s: compactParsed.signature.s.toBuffer(),
+      recoveryParam: compactParsed.i,
+    },
+    compactParsed.i,
+  )
 
-  return ECPair.fromPublicKeyBuffer(Buffer.from(pub.encodeCompressed()), network)
+  return ECPair.fromPublicKeyBuffer(
+    Buffer.from(pub.encodeCompressed()),
+    network,
+  )
 }
 
 ECPair.fromPublicKeyBuffer = function (buffer, network) {
@@ -74,7 +87,7 @@ ECPair.fromPublicKeyBuffer = function (buffer, network) {
 
   return new ECPair(null, Q, {
     compressed: Q.compressed,
-    network: network
+    network: network,
   })
 }
 ECPair.fromWIF = function (string, network, skipVersionCheck = false) {
@@ -83,24 +96,27 @@ ECPair.fromWIF = function (string, network, skipVersionCheck = false) {
 
   // list of networks?
   if (types.Array(network)) {
-    network = network.filter(function (x) {
-      return version === x.wif
-    }).pop()
+    network = network
+      .filter(function (x) {
+        return version === x.wif
+      })
+      .pop()
 
     if (!network) throw new Error('Unknown network version')
 
-  // otherwise, assume a network object (or default to bitcoin)
+    // otherwise, assume a network object (or default to bitcoin)
   } else {
     network = network || NETWORKS.bitcoin
 
-    if (!skipVersionCheck && version !== network.wif) throw new Error('Invalid network version')
+    if (!skipVersionCheck && version !== network.wif)
+      throw new Error('Invalid network version')
   }
 
   var d = BigInteger.fromBuffer(decoded.privateKey)
 
   return new ECPair(d, null, {
     compressed: decoded.compressed,
-    network: network
+    network: network,
   })
 }
 
@@ -121,7 +137,10 @@ ECPair.makeRandom = function (options) {
 }
 
 ECPair.prototype.getAddress = function () {
-  return baddress.toBase58Check(bcrypto.hash160(this.getPublicKeyBuffer()), this.getNetwork().pubKeyHash)
+  return baddress.toBase58Check(
+    bcrypto.hash160(this.getPublicKeyBuffer()),
+    this.getNetwork().pubKeyHash,
+  )
 }
 
 ECPair.prototype.getNetwork = function () {

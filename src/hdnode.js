@@ -14,10 +14,11 @@ var curve = ecurve.getCurveByName('secp256k1')
 
 var fastcurve = require('./fastcurve')
 
-function HDNode (keyPair, chainCode) {
+function HDNode(keyPair, chainCode) {
   typeforce(types.tuple('ECPair', types.Buffer256bit), arguments)
 
-  if (!keyPair.compressed) throw new TypeError('BIP32 only allows compressed keyPairs')
+  if (!keyPair.compressed)
+    throw new TypeError('BIP32 only allows compressed keyPairs')
 
   this.keyPair = keyPair
   this.chainCode = chainCode
@@ -45,7 +46,7 @@ HDNode.fromSeedBuffer = function (seed, network) {
   // This is handled by the ECPair constructor
   var pIL = BigInteger.fromBuffer(IL)
   var keyPair = new ECPair(pIL, null, {
-    network: network
+    network: network,
   })
 
   return new HDNode(keyPair, IR)
@@ -68,20 +69,21 @@ HDNode.fromBase58 = function (string, networks) {
     // FIXME(BG-16845):
     // This is only useful when you know the coin but you are not sure if it is mainnet or testnet.
     // All mainnets have xpub/xprv and all testnets have tpub/tprv as version.
-    network = networks.filter(function (x) {
-      return version === x.bip32.private ||
-             version === x.bip32.public
-    }).pop()
+    network = networks
+      .filter(function (x) {
+        return version === x.bip32.private || version === x.bip32.public
+      })
+      .pop()
 
     if (!network) throw new Error('Unknown network version')
 
-  // otherwise, assume a network object (or default to bitcoin)
+    // otherwise, assume a network object (or default to bitcoin)
   } else {
     network = networks || NETWORKS.bitcoin
   }
 
-  if (version !== network.bip32.private &&
-    version !== network.bip32.public) throw new Error('Invalid network version')
+  if (version !== network.bip32.private && version !== network.bip32.public)
+    throw new Error('Invalid network version')
 
   // 1 byte: depth: 0x00 for master nodes, 0x01 for level-1 descendants, ...
   var depth = buffer[4]
@@ -89,7 +91,8 @@ HDNode.fromBase58 = function (string, networks) {
   // 4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
   var parentFingerprint = buffer.readUInt32BE(5)
   if (depth === 0) {
-    if (parentFingerprint !== 0x00000000) throw new Error('Invalid parent fingerprint')
+    if (parentFingerprint !== 0x00000000)
+      throw new Error('Invalid parent fingerprint')
   }
 
   // 4 bytes: child number. This is the number i in xi = xpar/i, with xi the key being serialized.
@@ -106,9 +109,9 @@ HDNode.fromBase58 = function (string, networks) {
     if (buffer.readUInt8(45) !== 0x00) throw new Error('Invalid private key')
 
     var d = BigInteger.fromBuffer(buffer.slice(46, 78))
-    keyPair = new ECPair(d, null, { network: network })
+    keyPair = new ECPair(d, null, {network: network})
 
-  // 33 bytes: public key data (0x02 + X or 0x03 + X)
+    // 33 bytes: public key data (0x02 + X or 0x03 + X)
   } else {
     var Q = ecurve.Point.decodeFrom(curve, buffer.slice(45, 78))
     // Q.compressed is assumed, if somehow this assumption is broken, `new HDNode` will throw
@@ -117,7 +120,7 @@ HDNode.fromBase58 = function (string, networks) {
     // If not, the extended public key is invalid.
     curve.validate(Q)
 
-    keyPair = new ECPair(null, Q, { network: network })
+    keyPair = new ECPair(null, Q, {network: network})
   }
 
   var hd = new HDNode(keyPair, chainCode)
@@ -150,7 +153,7 @@ HDNode.prototype.getPublicKeyBuffer = function () {
 
 HDNode.prototype.neutered = function () {
   var neuteredKeyPair = new ECPair(null, this.keyPair.Q, {
-    network: this.keyPair.network
+    network: this.keyPair.network,
   })
 
   var neutered = new HDNode(neuteredKeyPair, this.chainCode)
@@ -170,11 +173,14 @@ HDNode.prototype.verify = function (hash, signature) {
 }
 
 HDNode.prototype.toBase58 = function (__isPrivate) {
-  if (__isPrivate !== undefined) throw new TypeError('Unsupported argument in 2.0.0')
+  if (__isPrivate !== undefined)
+    throw new TypeError('Unsupported argument in 2.0.0')
 
   // Version
   var network = this.keyPair.network
-  var version = (!this.isNeutered()) ? network.bip32.private : network.bip32.public
+  var version = !this.isNeutered()
+    ? network.bip32.private
+    : network.bip32.public
   var buffer = Buffer.allocUnsafe(78)
 
   // 4 bytes: version bytes
@@ -199,7 +205,7 @@ HDNode.prototype.toBase58 = function (__isPrivate) {
     buffer.writeUInt8(0, 45)
     this.keyPair.d.toBuffer(32).copy(buffer, 46)
 
-  // 33 bytes: the public key
+    // 33 bytes: the public key
   } else {
     // X9.62 encoding for public keys
     this.keyPair.getPublicKeyBuffer().copy(buffer, 45)
@@ -217,14 +223,15 @@ HDNode.prototype.derive = function (index) {
 
   // Hardened child
   if (isHardened) {
-    if (this.isNeutered()) throw new TypeError('Could not derive hardened child key')
+    if (this.isNeutered())
+      throw new TypeError('Could not derive hardened child key')
 
     // data = 0x00 || ser256(kpar) || ser32(index)
     data[0] = 0x00
     this.keyPair.d.toBuffer(32).copy(data, 1)
     data.writeUInt32BE(index, 33)
 
-  // Normal child
+    // Normal child
   } else {
     // data = serP(point(kpar)) || ser32(index)
     //      = serP(Kpar) || ser32(index)
@@ -255,17 +262,18 @@ HDNode.prototype.derive = function (index) {
     }
 
     derivedKeyPair = new ECPair(ki, null, {
-      network: this.keyPair.network
+      network: this.keyPair.network,
     })
 
-  // Public parent key -> public child key
+    // Public parent key -> public child key
   } else {
     // Ki = point(parse256(IL)) + Kpar
     //    = G*IL + Kpar
     var point = fastcurve.publicKeyCreate(IL, false)
-    var Ki = point !== undefined
-      ? ecurve.Point.decodeFrom(curve, point).add(this.keyPair.Q)
-      : curve.G.multiply(pIL).add(this.keyPair.Q)
+    var Ki =
+      point !== undefined
+        ? ecurve.Point.decodeFrom(curve, point).add(this.keyPair.Q)
+        : curve.G.multiply(pIL).add(this.keyPair.Q)
 
     // In case Ki is the point at infinity, proceed with the next value for i
     if (curve.isInfinity(Ki)) {
@@ -273,7 +281,7 @@ HDNode.prototype.derive = function (index) {
     }
 
     derivedKeyPair = new ECPair(null, Ki, {
-      network: this.keyPair.network
+      network: this.keyPair.network,
     })
   }
 
@@ -295,7 +303,7 @@ HDNode.prototype.deriveHardened = function (index) {
 // Private === not neutered
 // Public === neutered
 HDNode.prototype.isNeutered = function () {
-  return !(this.keyPair.d)
+  return !this.keyPair.d
 }
 
 HDNode.prototype.derivePath = function (path, cache) {
@@ -345,7 +353,7 @@ HDNode.prototype.cloneKeypair = function () {
   var k = this.keyPair
   var result = new ECPair(k.d, k.d ? null : k.Q, {
     network: k.network,
-    compressed: k.compressed
+    compressed: k.compressed,
   })
   // Creating Q from d takes ~25ms, so if it's not created, use native bindings to pre-compute
   // if Q is not set here, it will be lazily computed via the slow path

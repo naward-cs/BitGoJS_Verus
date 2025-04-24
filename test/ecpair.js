@@ -39,7 +39,7 @@ describe('ECPair', function () {
 
     it('supports the uncompressed option', function () {
       var keyPair = new ECPair(BigInteger.ONE, null, {
-        compressed: false
+        compressed: false,
       })
 
       assert.strictEqual(keyPair.compressed, false)
@@ -48,7 +48,7 @@ describe('ECPair', function () {
     it('supports the network option', function () {
       var keyPair = new ECPair(BigInteger.ONE, null, {
         compressed: false,
-        network: NETWORKS.testnet
+        network: NETWORKS.testnet,
       })
 
       assert.strictEqual(keyPair.network, NETWORKS.testnet)
@@ -58,7 +58,7 @@ describe('ECPair', function () {
       it('calculates the public point for ' + f.WIF, function () {
         var d = new BigInteger(f.d)
         var keyPair = new ECPair(d, null, {
-          compressed: f.compressed
+          compressed: f.compressed,
         })
 
         assert.strictEqual(keyPair.getPublicKeyBuffer().toString('hex'), f.Q)
@@ -84,12 +84,17 @@ describe('ECPair', function () {
       keyPair = new ECPair(BigInteger.ONE)
     })
 
-    it('wraps Q.getEncoded', sinon.test(function () {
-      this.mock(keyPair.Q).expects('getEncoded')
-        .once().withArgs(keyPair.compressed)
+    it(
+      'wraps Q.getEncoded',
+      sinon.test(function () {
+        this.mock(keyPair.Q)
+          .expects('getEncoded')
+          .once()
+          .withArgs(keyPair.compressed)
 
-      keyPair.getPublicKeyBuffer()
-    }))
+        keyPair.getPublicKeyBuffer()
+      }),
+    )
   })
 
   /**
@@ -98,28 +103,44 @@ describe('ECPair', function () {
    * Will be removed in next major version (BLOCK-267)
    */
   describe('getPrivateKeyBuffer', function () {
-    it('pads short private keys', sinon.test(function () {
-      var keyPair = new ECPair(BigInteger.ONE)
-      assert.strictEqual(keyPair.getPrivateKeyBuffer().byteLength, 32)
-      assert.strictEqual(keyPair.getPrivateKeyBuffer().toString('hex'),
-        '0000000000000000000000000000000000000000000000000000000000000001')
-    }))
+    it(
+      'pads short private keys',
+      sinon.test(function () {
+        var keyPair = new ECPair(BigInteger.ONE)
+        assert.strictEqual(keyPair.getPrivateKeyBuffer().byteLength, 32)
+        assert.strictEqual(
+          keyPair.getPrivateKeyBuffer().toString('hex'),
+          '0000000000000000000000000000000000000000000000000000000000000001',
+        )
+      }),
+    )
 
-    it('does not pad 32 bytes private keys', sinon.test(function () {
-      var hexString = 'a000000000000000000000000000000000000000000000000000000000000000'
-      var keyPair = new ECPair(new BigInteger(hexString, 16))
-      assert.strictEqual(keyPair.getPrivateKeyBuffer().byteLength, 32)
-      assert.strictEqual(keyPair.getPrivateKeyBuffer().toString('hex'), hexString)
-    }))
-
-    it('throws if the key is too long', sinon.test(function () {
-      var hexString = '10000000000000000000000000000000000000000000000000000000000000000'
-
-      assert.throws(function () {
+    it(
+      'does not pad 32 bytes private keys',
+      sinon.test(function () {
+        var hexString =
+          'a000000000000000000000000000000000000000000000000000000000000000'
         var keyPair = new ECPair(new BigInteger(hexString, 16))
-        keyPair.getPrivateKeyBuffer()
-      }, new RegExp('Private key must be less than the curve order'))
-    }))
+        assert.strictEqual(keyPair.getPrivateKeyBuffer().byteLength, 32)
+        assert.strictEqual(
+          keyPair.getPrivateKeyBuffer().toString('hex'),
+          hexString,
+        )
+      }),
+    )
+
+    it(
+      'throws if the key is too long',
+      sinon.test(function () {
+        var hexString =
+          '10000000000000000000000000000000000000000000000000000000000000000'
+
+        assert.throws(function () {
+          var keyPair = new ECPair(new BigInteger(hexString, 16))
+          keyPair.getPrivateKeyBuffer()
+        }, new RegExp('Private key must be less than the curve order'))
+      }),
+    )
   })
 
   describe('fromWIF', function () {
@@ -165,12 +186,23 @@ describe('ECPair', function () {
     })
 
     fixtures.valid.forEach(function (f) {
-      it('recovers valid pubkey for signature by' + f.WIF + ' (' + f.network + ')', function () {
-        var network = NETWORKS[f.network]
-        const pubKeyPair = ECPair.recoverFromSignature(hash, sig.toCompact(0, true), network)
+      it(
+        'recovers valid pubkey for signature by' +
+          f.WIF +
+          ' (' +
+          f.network +
+          ')',
+        function () {
+          var network = NETWORKS[f.network]
+          const pubKeyPair = ECPair.recoverFromSignature(
+            hash,
+            sig.toCompact(0, true),
+            network,
+          )
 
-        assert.strictEqual(pubKeyPair.verify(hash, sig), true)
-      })
+          assert.strictEqual(pubKeyPair.verify(hash, sig), true)
+        },
+      )
     })
   })
 
@@ -186,12 +218,19 @@ describe('ECPair', function () {
   })
 
   describe('makeRandom', function () {
-    var d = Buffer.from('0404040404040404040404040404040404040404040404040404040404040404', 'hex')
+    var d = Buffer.from(
+      '0404040404040404040404040404040404040404040404040404040404040404',
+      'hex',
+    )
     var exWIF = 'KwMWvwRJeFqxYyhZgNwYuYjbQENDAPAudQx5VEmKJrUZcq6aL2pv'
 
     describe('uses randombytes RNG', function () {
       it('generates a ECPair', function () {
-        var stub = { randombytes: function () { return d } }
+        var stub = {
+          randombytes: function () {
+            return d
+          },
+        }
         var ProxiedECPair = proxyquire('../src/ecpair', stub)
 
         var keyPair = ProxiedECPair.makeRandom()
@@ -201,7 +240,9 @@ describe('ECPair', function () {
 
     it('allows a custom RNG to be used', function () {
       var keyPair = ECPair.makeRandom({
-        rng: function (size) { return d.slice(0, size) }
+        rng: function (size) {
+          return d.slice(0, size)
+        },
       })
 
       assert.strictEqual(keyPair.toWIF(), exWIF)
@@ -217,31 +258,37 @@ describe('ECPair', function () {
     it('supports the options parameter', function () {
       var keyPair = ECPair.makeRandom({
         compressed: false,
-        network: NETWORKS.testnet
+        network: NETWORKS.testnet,
       })
 
       assert.strictEqual(keyPair.compressed, false)
       assert.strictEqual(keyPair.network, NETWORKS.testnet)
     })
 
-    it('loops until d is within interval [1, n - 1] : 1', sinon.test(function () {
-      var rng = this.mock()
-      rng.exactly(2)
-      rng.onCall(0).returns(BigInteger.ZERO.toBuffer(32)) // invalid length
-      rng.onCall(1).returns(BigInteger.ONE.toBuffer(32)) // === 1
+    it(
+      'loops until d is within interval [1, n - 1] : 1',
+      sinon.test(function () {
+        var rng = this.mock()
+        rng.exactly(2)
+        rng.onCall(0).returns(BigInteger.ZERO.toBuffer(32)) // invalid length
+        rng.onCall(1).returns(BigInteger.ONE.toBuffer(32)) // === 1
 
-      ECPair.makeRandom({ rng: rng })
-    }))
+        ECPair.makeRandom({rng: rng})
+      }),
+    )
 
-    it('loops until d is within interval [1, n - 1] : n - 1', sinon.test(function () {
-      var rng = this.mock()
-      rng.exactly(3)
-      rng.onCall(0).returns(BigInteger.ZERO.toBuffer(32)) // < 1
-      rng.onCall(1).returns(curve.n.toBuffer(32)) // > n-1
-      rng.onCall(2).returns(curve.n.subtract(BigInteger.ONE).toBuffer(32)) // === n-1
+    it(
+      'loops until d is within interval [1, n - 1] : n - 1',
+      sinon.test(function () {
+        var rng = this.mock()
+        rng.exactly(3)
+        rng.onCall(0).returns(BigInteger.ZERO.toBuffer(32)) // < 1
+        rng.onCall(1).returns(curve.n.toBuffer(32)) // > n-1
+        rng.onCall(2).returns(curve.n.subtract(BigInteger.ONE).toBuffer(32)) // === n-1
 
-      ECPair.makeRandom({ rng: rng })
-    }))
+        ECPair.makeRandom({rng: rng})
+      }),
+    )
   })
 
   describe('getAddress', function () {
@@ -274,21 +321,28 @@ describe('ECPair', function () {
     })
 
     describe('signing', function () {
-      it('wraps ecdsa.sign', sinon.test(function () {
-        this.mock(fastcurve).expects('sign')
-          .once().withArgs(hash, keyPair.d).returns(undefined)
-        this.mock(ecdsa).expects('sign')
-          .once().withArgs(hash, keyPair.d)
+      it(
+        'wraps ecdsa.sign',
+        sinon.test(function () {
+          this.mock(fastcurve)
+            .expects('sign')
+            .once()
+            .withArgs(hash, keyPair.d)
+            .returns(undefined)
+          this.mock(ecdsa).expects('sign').once().withArgs(hash, keyPair.d)
 
-        keyPair.sign(hash)
-      }))
+          keyPair.sign(hash)
+        }),
+      )
 
-      it('wraps fastcurve.sign', sinon.test(function () {
-        this.mock(fastcurve).expects('sign')
-        .once().withArgs(hash, keyPair.d)
+      it(
+        'wraps fastcurve.sign',
+        sinon.test(function () {
+          this.mock(fastcurve).expects('sign').once().withArgs(hash, keyPair.d)
 
-        keyPair.sign(hash)
-      }))
+          keyPair.sign(hash)
+        }),
+      )
 
       it('throws if no private key is found', function () {
         keyPair.d = null
@@ -306,30 +360,49 @@ describe('ECPair', function () {
         signature = keyPair.sign(hash)
       })
 
-      it('wraps ecdsa.verify', sinon.test(function () {
-        this.mock(fastcurve).expects('verify')
-          .once().withArgs(hash, signature, keyPair.getPublicKeyBuffer()).returns(undefined)
-        this.mock(ecdsa).expects('verify')
-          .once().withArgs(hash, signature, keyPair.Q)
+      it(
+        'wraps ecdsa.verify',
+        sinon.test(function () {
+          this.mock(fastcurve)
+            .expects('verify')
+            .once()
+            .withArgs(hash, signature, keyPair.getPublicKeyBuffer())
+            .returns(undefined)
+          this.mock(ecdsa)
+            .expects('verify')
+            .once()
+            .withArgs(hash, signature, keyPair.Q)
 
-        keyPair.verify(hash, signature)
-      }))
+          keyPair.verify(hash, signature)
+        }),
+      )
 
-      it('wraps fastcurve.verify', sinon.test(function () {
-        this.mock(fastcurve).expects('verify')
-        .once().withArgs(hash, signature, keyPair.getPublicKeyBuffer())
+      it(
+        'wraps fastcurve.verify',
+        sinon.test(function () {
+          this.mock(fastcurve)
+            .expects('verify')
+            .once()
+            .withArgs(hash, signature, keyPair.getPublicKeyBuffer())
 
-        keyPair.verify(hash, signature)
-      }))
+          keyPair.verify(hash, signature)
+        }),
+      )
 
-      it('handles falsey return values from fastcurve.verify', sinon.test(function () {
-        this.mock(fastcurve).expects('verify')
-        .once().withArgs(hash, signature, keyPair.getPublicKeyBuffer()).returns(false)
+      it(
+        'handles falsey return values from fastcurve.verify',
+        sinon.test(function () {
+          this.mock(fastcurve)
+            .expects('verify')
+            .once()
+            .withArgs(hash, signature, keyPair.getPublicKeyBuffer())
+            .returns(false)
 
-        this.mock(ecdsa).expects('verify').never()
+          this.mock(ecdsa).expects('verify').never()
 
-        keyPair.verify(hash, signature)
-      }))
+          keyPair.verify(hash, signature)
+        }),
+      )
     })
   })
 

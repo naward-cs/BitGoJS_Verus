@@ -1,9 +1,7 @@
-/**
- * @prettier
- */
+import type {Network, ZcashNetwork} from '../types'
+
 import {getMainnet} from '../networks/coins'
 import * as networks from '../networks/networks'
-import {Network, ZcashNetwork} from '../networkTypes'
 
 const Transaction = require('../transaction')
 const TransactionBuilder = require('../transaction_builder')
