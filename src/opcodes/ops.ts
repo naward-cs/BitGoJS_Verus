@@ -138,7 +138,7 @@ enum OPS {
   OP_INVALIDOPCODE = 255,
 }
 
-const REVERSE_OPS: {[key: string]: unknown} = {}
+const REVERSE_OPS: {[key: string]: string} = {}
 for (const op in OPS) {
   const code = OPS[op]
   REVERSE_OPS[code] = op

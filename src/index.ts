@@ -1,11 +1,11 @@
-var script = require('./script')
+const script = require('./script')
 
-var templates = require('./templates')
-for (var key in templates) {
+const templates = require('./templates')
+for (const key in templates) {
   script[key] = templates[key]
 }
 
-module.exports = {
+export default {
   bitgo: require('./bitgo'),
   bufferutils: require('./bufferutils'), // TODO: remove in 4.0.0
 
