@@ -2,7 +2,7 @@ import type {Stack} from './types'
 
 import * as bip66 from 'bip66'
 
-import pushdata from './lib/pushdata-bitcoin'; //todo may need to just bring it in
+import pushdata from './lib/pushdata-bitcoin' //todo may need to just bring it in
 import typeGuard, {
   isArray,
   isBuffer,
@@ -11,7 +11,7 @@ import typeGuard, {
   isString,
 } from './lib/type-guard'
 import {OP_INT_BASE, OPS, REVERSE_OPS} from './opcodes'
-import scriptNumber from './script_number'; //TODO convert
+import scriptNumber from './script_number' //TODO convert
 
 function isOPInt(value: unknown): value is number {
   return (
@@ -51,9 +51,10 @@ function asMinimalOP(buffer: Buffer): number | undefined {
  * @returns The compiled script as a Buffer.
  * @throws Error if compilation fails.
  */
-function compile(chunks: Stack): Buffer<ArrayBufferLike> {
+//TODO:validate
+export function compile(chunks: Buffer | Stack): Buffer<ArrayBufferLike> {
   // TODO: remove me ??why is this a remove me
-  // if (isBuffer(chunks)) return chunks
+  if (isBuffer(chunks)) return chunks
 
   typeGuard(isArray, chunks)
 
@@ -107,9 +108,9 @@ function compile(chunks: Stack): Buffer<ArrayBufferLike> {
  * @param buffer - The script buffer to decompile.
  * @returns The decompiled chunks or null if decompilation fails.
  */
-function decompile(buffer: Buffer): Stack {
+export function decompile(buffer: Buffer | Stack): Stack {
   // TODO: remove me ??why
-  // if (isArray(buffer)) return buffer
+  if (isArray(buffer)) return buffer
   typeGuard(isBuffer, buffer)
 
   const chunks: Stack = []
@@ -158,7 +159,7 @@ function decompile(buffer: Buffer): Stack {
  * @param chunks - The chunks to convert into ASM.
  * @returns The ASM string representation of the chunks.
  */
-function toASM(chunks: Buffer | Stack): string {
+export function toASM(chunks: Buffer | Stack): string {
   if (Buffer.isBuffer(chunks)) {
     chunks = decompile(chunks)
   }
@@ -183,7 +184,7 @@ function toASM(chunks: Buffer | Stack): string {
  * @param asm The ASM string to convert.
  * @returns The converted Buffer.
  */
-function fromASM(asm: string): Buffer<ArrayBufferLike> {
+export function fromASM(asm: string): Buffer<ArrayBufferLike> {
   typeGuard(isString, asm)
 
   return compile(
@@ -205,7 +206,7 @@ function fromASM(asm: string): Buffer<ArrayBufferLike> {
  * @returns The stack of buffers.
  */
 //TODO is toStack chunks Buffer??? or Stack??
-function toStack(chunks: Buffer | Stack): Buffer<ArrayBufferLike>[] {
+export function toStack(chunks: Buffer | Stack): Buffer<ArrayBufferLike>[] {
   if (isBuffer(chunks)) {
     chunks = decompile(chunks)
   }
@@ -221,7 +222,7 @@ function toStack(chunks: Buffer | Stack): Buffer<ArrayBufferLike>[] {
   })
 }
 
-function isCanonicalPubKey(buffer: unknown): buffer is Buffer {
+export function isCanonicalPubKey(buffer: unknown): buffer is Buffer {
   if (!Buffer.isBuffer(buffer)) return false
   if (buffer.length < 33) return false
 
@@ -236,7 +237,7 @@ function isCanonicalPubKey(buffer: unknown): buffer is Buffer {
   return false
 }
 
-function isDefinedHashType(hashType: number): boolean {
+export function isDefinedHashType(hashType: number): boolean {
   const hashTypeMod = hashType & ~0xc0
 
   // return hashTypeMod > SIGHASH_ALL && hashTypeMod < SIGHASH_SINGLE

@@ -1,14 +1,15 @@
 // m [pubKeys ...] n OP_CHECKMULTISIG
+// number [...buffer[]] number number
+import type {Stack} from '../../types'
 
-var bscript = require('../../script')
-var types = require('../../types')
-var typeforce = require('typeforce')
-var OPS = require('bitcoin-ops')
+import typeGuard, {isArray, isNumber} from '../../lib/type-guard'
+import {OP_INT_BASE, OPS} from '../../opcodes'
+import bscript from '../../script'
+
 const OptCCParams = require('../../optccparams')
-var OP_INT_BASE = OPS.OP_RESERVED // OP_1 - 1
 
-function check(script) {
-  var chunks = bscript.decompile(script)
+export function check(script: Buffer | Stack): boolean {
+  const chunks = bscript.decompile(script)
 
   // chunks for a smart transaction should include a push of either a CC or empty/master COptCCParams, then an OP_CHECKCRYPTOCONDITION,
   // then a potentially nested COptCCParams
@@ -35,42 +36,46 @@ function check(script) {
 
   return true
 }
-check.toJSON = function () {
+check.toJSON = function (): string {
   return 'smart transaction output'
 }
 
-function encode(m, pubKeys) {
-  typeforce(
-    {
-      m: types.Number,
-      pubKeys: [bscript.isCanonicalPubKey],
-    },
-    {
-      m: m,
-      pubKeys: pubKeys,
-    },
-  )
+function encode(
+  m: number,
+  pubKeys: Buffer<ArrayBufferLike>[],
+): Buffer<ArrayBufferLike> {
+  typeGuard([isNumber, isArray], [m, pubKeys])
+  pubKeys.every(p => typeGuard(bscript.isCanonicalPubKey, p))
 
-  var n = pubKeys.length
+  const n = pubKeys.length
   if (n < m) throw new TypeError('Not enough pubKeys provided')
 
   return bscript.compile(
-    [].concat(OP_INT_BASE + m, pubKeys, OP_INT_BASE + n, OPS.OP_CHECKMULTISIG),
+    ([] as Stack).concat(
+      OP_INT_BASE + m,
+      pubKeys,
+      OP_INT_BASE + n,
+      OPS.OP_CHECKMULTISIG,
+    ),
   )
 }
 
-function decode(buffer, allowIncomplete) {
-  var chunks = bscript.decompile(buffer)
-  typeforce(check, chunks, allowIncomplete)
+function decode(
+  buffer: Buffer<ArrayBufferLike>,
+  allowIncomplete?: boolean,
+): {m: number; pubKeys: Buffer<ArrayBufferLike>[]} {
+  const chunks = bscript.decompile(buffer)
+
+  typeGuard(check, chunks, allowIncomplete)
 
   return {
-    m: chunks[0] - OP_INT_BASE,
-    pubKeys: chunks.slice(1, -2),
+    m: (chunks[0] as number) - OP_INT_BASE,
+    pubKeys: chunks.slice(1, -2) as Buffer[],
   }
 }
 
-module.exports = {
-  check: check,
-  decode: decode,
-  encode: encode,
+export default {
+  check,
+  decode,
+  encode,
 }

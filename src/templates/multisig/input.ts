@@ -1,16 +1,21 @@
 // OP_0 [signatures ...]
+// [number, ...Buffer[]]
 
-const Buffer = require('safe-buffer').Buffer
-const bscript = require('../../script')
-const p2mso = require('./output')
-const typeforce = require('typeforce')
-const OPS = require('bitcoin-ops')
+import type {Stack} from '../../types'
 
-function partialSignature(value) {
+import typeGuard from '../../lib/type-guard'
+import {OPS} from '../../opcodes'
+import bscript from '../../script'
+import p2mso from './output'
+
+function partialSignature(value: unknown): value is number | Buffer {
   return value === OPS.OP_0 || bscript.isCanonicalSignature(value)
 }
 
-function check(script, allowIncomplete) {
+export function check(
+  script: Buffer | Stack,
+  allowIncomplete?: boolean,
+): boolean {
   const chunks = bscript.decompile(script)
   if (chunks.length < 2) return false
   if (chunks[0] !== OPS.OP_0) return false
@@ -27,8 +32,11 @@ check.toJSON = function () {
 
 const EMPTY_BUFFER = Buffer.allocUnsafe(0)
 
-function encodeStack(signatures, scriptPubKey) {
-  typeforce([partialSignature], signatures)
+function encodeStack(
+  signatures: [OPS.OP_0, ...Buffer[]],
+  scriptPubKey?: Buffer,
+): Buffer<ArrayBufferLike>[] {
+  signatures.every(s => typeGuard(partialSignature, s))
 
   if (scriptPubKey) {
     const scriptData = p2mso.decode(scriptPubKey)
@@ -42,9 +50,9 @@ function encodeStack(signatures, scriptPubKey) {
     }
   }
 
-  return [].concat(
+  return ([] as Buffer[]).concat(
     EMPTY_BUFFER,
-    signatures.map(function (sig) {
+    signatures.map(function (sig): Buffer {
       if (sig === OPS.OP_0) {
         return EMPTY_BUFFER
       }
@@ -53,24 +61,27 @@ function encodeStack(signatures, scriptPubKey) {
   )
 }
 
-function encode(signatures, scriptPubKey) {
+function encode(
+  signatures: [OPS.OP_0, ...Buffer[]],
+  scriptPubKey?: Buffer,
+): Buffer<ArrayBufferLike> {
   return bscript.compile(encodeStack(signatures, scriptPubKey))
 }
 
-function decodeStack(stack, allowIncomplete) {
-  typeforce(check, stack, allowIncomplete)
-  return stack.slice(1)
+function decodeStack(stack: Stack, allowIncomplete?: boolean): Buffer[] {
+  typeGuard(check, stack, allowIncomplete)
+  return stack.slice(1) as Buffer[]
 }
 
-function decode(buffer, allowIncomplete) {
+function decode(buffer: Buffer, allowIncomplete?: boolean): Buffer[] {
   const stack = bscript.decompile(buffer)
   return decodeStack(stack, allowIncomplete)
 }
 
-module.exports = {
-  check: check,
-  decode: decode,
-  decodeStack: decodeStack,
-  encode: encode,
-  encodeStack: encodeStack,
+export default {
+  check,
+  decode,
+  decodeStack,
+  encode,
+  encodeStack,
 }

@@ -1,15 +1,17 @@
-var decompile = require('../script').decompile
-var multisig = require('./multisig')
-var nullData = require('./nulldata')
-var pubKey = require('./pubkey')
-var pubKeyHash = require('./pubkeyhash')
-var scriptHash = require('./scripthash')
-var witnessPubKeyHash = require('./witnesspubkeyhash')
-var witnessScriptHash = require('./witnessscripthash')
-var witnessCommitment = require('./witnesscommitment')
-var smartTransaction = require('./smarttransaction')
+import type {Stack} from '../types'
 
-var types = {
+import {decompile} from '../script'
+import multisig from './multisig'
+import nullData from './nulldata'
+import pubKey from './pubkey'
+import pubKeyHash from './pubkeyhash'
+import scriptHash from './scripthash'
+import smartTransaction from './smarttransaction'
+import witnessCommitment from './witnesscommitment'
+import witnessPubKeyHash from './witnesspubkeyhash'
+import witnessScriptHash from './witnessscripthash'
+
+const types = {
   MULTISIG: 'multisig',
   NONSTANDARD: 'nonstandard',
   NULLDATA: 'nulldata',
@@ -22,14 +24,14 @@ var types = {
   SMART_TRANSACTION: 'smarttransaction',
 }
 
-function classifyOutput(script) {
+function classifyOutput(script: Buffer | Stack): string {
   if (witnessPubKeyHash.output.check(script)) return types.P2WPKH
   if (witnessScriptHash.output.check(script)) return types.P2WSH
   if (pubKeyHash.output.check(script)) return types.P2PKH
   if (scriptHash.output.check(script)) return types.P2SH
 
   // XXX: optimization, below functions .decompile before use
-  var chunks = decompile(script)
+  const chunks = decompile(script)
   if (smartTransaction.output.check(chunks)) return types.SMART_TRANSACTION
   if (multisig.output.check(chunks)) return types.MULTISIG
   if (pubKey.output.check(chunks)) return types.P2PK
@@ -39,9 +41,12 @@ function classifyOutput(script) {
   return types.NONSTANDARD
 }
 
-function classifyInput(script, allowIncomplete) {
+function classifyInput(
+  script: Buffer | Stack,
+  allowIncomplete?: boolean,
+): string {
   // XXX: optimization, below functions .decompile before use
-  var chunks = decompile(script)
+  const chunks = decompile(script)
 
   if (pubKeyHash.input.check(chunks)) return types.P2PKH
   if (scriptHash.input.check(chunks, allowIncomplete)) return types.P2SH
@@ -52,9 +57,12 @@ function classifyInput(script, allowIncomplete) {
   return types.NONSTANDARD
 }
 
-function classifyWitness(script, allowIncomplete) {
+function classifyWitness(
+  script: Buffer | Stack,
+  allowIncomplete?: boolean,
+): string {
   // XXX: optimization, below functions .decompile before use
-  var chunks = decompile(script)
+  const chunks = decompile(script)
 
   if (witnessPubKeyHash.input.check(chunks)) return types.P2WPKH
   if (witnessScriptHash.input.check(chunks, allowIncomplete)) return types.P2WSH
@@ -62,18 +70,18 @@ function classifyWitness(script, allowIncomplete) {
   return types.NONSTANDARD
 }
 
-module.exports = {
-  classifyInput: classifyInput,
-  classifyOutput: classifyOutput,
-  classifyWitness: classifyWitness,
-  multisig: multisig,
-  nullData: nullData,
-  pubKey: pubKey,
-  pubKeyHash: pubKeyHash,
-  scriptHash: scriptHash,
-  smartTransaction: smartTransaction,
-  witnessPubKeyHash: witnessPubKeyHash,
-  witnessScriptHash: witnessScriptHash,
-  witnessCommitment: witnessCommitment,
-  types: types,
+export default {
+  classifyInput,
+  classifyOutput,
+  classifyWitness,
+  multisig,
+  nullData,
+  pubKey,
+  pubKeyHash,
+  scriptHash,
+  smartTransaction,
+  witnessPubKeyHash,
+  witnessScriptHash,
+  witnessCommitment,
+  types,
 }
